@@ -1,0 +1,4 @@
+// array indexing with a statement inside
+x: function boolean() = {
+    what[90][x=5;];
+   }

@@ -1,0 +1,10 @@
+// mix of while and for and if
+func : function integer() = {
+if (yes) 
+    for (;;)
+        while (true)
+            if (no) return false;
+            else print false;
+else
+    x = a;
+       }

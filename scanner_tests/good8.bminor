@@ -1,0 +1,6 @@
+// checking for empty functions and nested statements
+a: function auto () = {
+    
+   }
+b : function boolean () = { {return false;} return true; }
+c : void = a;

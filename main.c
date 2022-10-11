@@ -5,8 +5,11 @@
 extern FILE *yyin;
 extern int yylex();
 extern char *yytext;
+extern int yyparse();
+typedef enum yytokentype token_t;
 
-
+#define TOKEN_EOF 0
+   
 /**
  * Display usage message.
  * @param       program     String containing name of program.
@@ -69,84 +72,7 @@ void print_char(char * char_literal) {
     printf("%-20s %10c\n", "CHARACTER LITERAL", char_literal[1]);
 }
 
-int main(int argc, char*argv[]) {
-
-    char* tokens[] = {
-        "EOF",
-        "MULTI_COMMENT",
-        "SINGLE_COMMENT",
-        "STRING",
-        "CHARACTER ERROR",
-        "CHARACTER_LITERAL",
-        "ARRAY",
-        "AUTO",
-        "BOOLEAN",
-        "KEYWORD_CHAR",
-        "ELSE",
-        "FOR",
-        "FUNCTION",
-        "IF",
-        "INTEGER",
-        "PRINT",
-        "RETURN",
-        "KEYWORD STRING",
-        "VOID",
-        "WHILE",
-        "TRUE",
-        "FALSE",
-        "AND",
-        "OR",
-        "TERNARY",
-        "COLON",
-        "SEMICOLON",
-        "COMMA",
-        "OPEN SQUARE BRACKET",
-        "CLOSE SQUARE BRACKET",
-        "OPEN CURLY BRACE",
-        "CLOSE CURLY BRACE",
-        "OPEN PARENTHESES",
-        "CLOSE PARENTHESES",
-        "ASSIGNMENT",
-        "EXPONENT",
-        "INCREMENT",
-        "DECREMENT",
-        "ADD",
-        "HYPHEN",
-        "ASTERISK",
-        "FORWARD SLASH",
-        "PERCENT",
-        "EQUALS SIGN",
-        "LESS THAN OR EQUAL TO",
-        "GREATER THAN OR EQUAL TO",
-        "LESS THAN",
-        "GREATER THAN",
-        "NOT EQUAL TO",
-        "NOT",
-        "IDENTIFIER",
-        "INTEGER_LITERAL",
-        "TOKEN ERROR"
-    };
-
-
-    int argind = 1;
-    char *opt;
-    char *arg;
-
-    while (argind < argc && strlen(argv[argind]) > 1 && argv[argind][0] == '-')
-    {
-        if (strcmp(argv[argind++], "-scan") == 0) {
-            opt = argv[argind++];
-        } else {
-            usage(argv[0]);
-            return 1;
-        }
-    }
-    yyin = fopen(opt, "r");
-    if (!yyin) {
-        usage(argv[0]);
-        return 1;
-    }
-
+int scan (){
     while (1) {
         token_t t = yylex();
         if (t == TOKEN_EOF) break;
@@ -160,16 +86,113 @@ int main(int argc, char*argv[]) {
         }
         else if (t == TOKEN_CHAR) {
             print_char(yytext);
-        } else if (t == TOKEN_NUMBER 
-                || t == TOKEN_IDENT) {
-            printf("%-20s %20s\n", tokens[t], yytext);
-        } else if (t == TOKEN_ERROR_CHAR 
-                    || t == TOKEN_ERROR_INVALID) {
-                fprintf(stderr, "%-20s %20s\n", tokens[t], yytext);
-                exit(EXIT_FAILURE);
-        }
+        } else if (t == TOKEN_NUMBER) {
+            printf("%-20s %20s\n", "TOKEN_NUMBER", yytext);
+        } else if (t == TOKEN_IDENT) {
+            printf("%-20s %20s\n", "TOKEN_IDENT", yytext);
+        } else if (t == TOKEN_ERROR_CHAR) {
+            fprintf(stderr, "%-20s %20s\n", "TOKEN ERROR CHAR", yytext);
+            exit(EXIT_FAILURE);
+        } else if (t == TOKEN_ERROR_INVALID) {
+            fprintf(stderr, "%-20s %20s\n", "TOKEN ERROR INVALID", yytext);
+            exit(EXIT_FAILURE);
+        } else if (t == TOKEN_MULTI_COMMENT) printf("%-20s\n", "MULTILINE COMMENT");
+        else if (t == TOKEN_SINGLE_COMMENT) printf("%-20s\n", "SINGLE COMMENT");
+        else if (t == TOKEN_ARRAY) printf("%-20s\n", "ARRAY KEYWORD");
+        else if (t == TOKEN_AUTO) printf("%-20s\n", "AUTO KEYWORD");
+        else if (t == TOKEN_BOOLEAN) printf("%-20s\n", "BOOLEAN KEYWORD");
+        else if (t == TOKEN_KEYWORD_CHAR) printf("%-20s\n", "CHAR KEYWORD");
+        else if (t == TOKEN_INTEGER) printf("%-20s\n", "INTEGER KEYWORD");
+        else if (t == TOKEN_ELSE) printf("%-20s\n", "ELSE KEYWORD");
+        else if (t == TOKEN_FOR) printf("%-20s\n", "FOR KEYWORD");
+        else if (t == TOKEN_FUNCTION) printf("%-20s\n", "FUNCTION KEYWORD");
+        else if (t == TOKEN_IF) printf("%-20s\n", "IF KEYWORD");
+        else if (t == TOKEN_PRINT) printf("%-20s\n", "PRINT KEYWORD");
+        else if (t == TOKEN_RETURN) printf("%-20s\n", "RETURN KEYWORD");
+        else if (t == TOKEN_KEYWORD_STRING) printf("%-20s\n", "STRING KEYWORD");
+        else if (t == TOKEN_VOID) printf("%-20s\n", "VOID KEYWORD");
+        else if (t == TOKEN_WHILE) printf("%-20s\n", "WHILE KEYWORD");
+        else if (t == TOKEN_TRUE) printf("%-20s\n", "TRUE");
+        else if (t == TOKEN_FALSE) printf("%-20s\n", "FALSE");
+        else if (t == TOKEN_AND) printf("%-20s\n", "AND");
+        else if (t == TOKEN_OR) printf("%-20s\n", "OR");
+        else if (t == TOKEN_TERNARY) printf("%-20s\n", "TERNARY");
+        else if (t == TOKEN_COLON) printf("%-20s\n", "COLON");
+        else if (t == TOKEN_SEMICOLON) printf("%-20s\n", "SEMICOLON");
+        else if (t == TOKEN_COMMA) printf("%-20s\n", "COMMA");
+        else if (t == TOKEN_LBRACKET) printf("%-20s\n", "LBRACKET");
+        else if (t == TOKEN_RBRACKET) printf("%-20s\n", "RBRACKET");
+        else if (t == TOKEN_LBRACE) printf("%-20s\n", "LBRACE");
+        else if (t == TOKEN_RBRACE) printf("%-20s\n", "RBRACE");
+        else if (t == TOKEN_LPAREN) printf("%-20s\n", "LPAREN");
+        else if (t == TOKEN_RPAREN) printf("%-20s\n", "RPAREN");
+        else if (t == TOKEN_ASSIGNMENT) printf("%-20s\n", "ASSIGNMENT");
+        else if (t == TOKEN_EXPONENT) printf("%-20s\n", "EXPONENT");
+        else if (t == TOKEN_INCREMENT) printf("%-20s\n", "INCREMENT");
+        else if (t == TOKEN_DECREMENT) printf("%-20s\n", "DECREMENT");
+        else if (t == TOKEN_ADD) printf("%-20s\n", "ADD");
+        else if (t == TOKEN_HYPHEN) printf("%-20s\n", "HYPHEN");
+        else if (t == TOKEN_ASTERISK) printf("%-20s\n", "ASTERISK");
+        else if (t == TOKEN_FORWARD_SLASH) printf("%-20s\n", "FORWARD SLASH");
+        else if (t == TOKEN_PERCENT) printf("%-20s\n", "PERCENT");
+        else if (t == TOKEN_EQ) printf("%-20s\n", "EQUALS");
+        else if (t == TOKEN_LE) printf("%-20s\n", "LE");
+        else if (t == TOKEN_GE) printf("%-20s\n", "GE");
+        else if (t == TOKEN_LT) printf("%-20s\n", "LT");
+        else if (t == TOKEN_GT) printf("%-20s\n", "GT");
+        else if (t == TOKEN_NE) printf("%-20s\n", "NE");
+        else if (t == TOKEN_NOT) printf("%-20s\n", "NOT");
+
     }
     exit(EXIT_SUCCESS);
 }
+
+int parse() {
+    int y = yyparse();
+    printf("%d\n", y);
+    if  (!y) {
+        printf("parse successful!\n");
+        return 0;
+    } else {
+        printf("parse failed.\n");
+        return 1;
+    }
+}
+
+int main(int argc, char*argv[]) {
+    int argind = 1;
+    char *opt;
+    char *file;
+
+    while (argind < argc && strlen(argv[argind]) > 1 && argv[argind][0] == '-')
+    {
+        if (strcmp(argv[argind], "-scan") == 0) {
+            opt = argv[argind++];
+            file = argv[argind];
+            yyin = fopen(file, "r");
+            if (!yyin) {
+                usage(argv[0]);
+                return 1;
+            }
+            return scan();
+
+        } else if (strcmp(argv[argind],"-parse") == 0) {
+            opt = argv[argind++];
+            file = argv[argind];
+            yyin = fopen(file, "r");
+            if (!yyin) {
+                usage(argv[0]);
+                return 1;
+            }
+            return parse();
+            
+        } else {
+            usage(argv[0]);
+            return 1;
+        }
+    }
+   
+}
+
 
 /* vim: set expandtab sts=4 sw=4 ts=8 ft=c: */

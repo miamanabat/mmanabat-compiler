@@ -1,0 +1,6 @@
+// ternary and assignment
+x: function void() = {
+    a = 3 = true ? "yes" : "no";
+    b = false ? true ? true : false : false;
+    c = false ? true : true ? false : false;
+   }

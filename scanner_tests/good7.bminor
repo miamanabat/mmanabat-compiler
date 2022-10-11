@@ -1,0 +1,9 @@
+// for loops 
+for_func: function auto () = {
+              for (;;) {
+                  for (x == 2; 72; true++) print "yay", great, 34;
+              }
+              for (; 32; hi) {
+                return he_32;
+              }
+          }

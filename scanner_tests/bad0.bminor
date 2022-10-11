@@ -1,0 +1,2 @@
+// assignment without a type
+x: number = 483 + "hello";

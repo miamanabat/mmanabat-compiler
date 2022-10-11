@@ -1,0 +1,9 @@
+/* working on the array initializing and parameters
+yay! */
+
+arr: array [3] char = {1, djekd, 'a', true};
+x: integer = -4;
+
+func: function integer (a: array[] void, b: array[238] array[] array[] array[3] boolean ) = { 
+    return true;
+}

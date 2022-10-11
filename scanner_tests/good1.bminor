@@ -1,0 +1,6 @@
+// testing boolean and math and stuffs
+dog: integer = 3 + 4 > "hello" + cat;
+hello: boolean = 2 == 4 = 3 <= 4 >= 2345 + what - dog;
+what: function void () = {
+    abc = (a) * ((b) + c^3 % what);
+      }

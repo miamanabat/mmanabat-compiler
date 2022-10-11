@@ -1,0 +1,12 @@
+// if else statements 
+hello: function char () = {
+    dog: auto = 3454318;
+         if (dog) {
+            print true;
+         } else if (1) {
+            return "no dog";
+            if ("hello")
+                print what;
+         } else
+            abc(2);
+}

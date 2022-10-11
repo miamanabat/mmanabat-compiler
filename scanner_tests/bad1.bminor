@@ -1,0 +1,4 @@
+// double boolean operators (missing expr)
+main: function void () = {
+    x = 5<<thirty_five;
+      }

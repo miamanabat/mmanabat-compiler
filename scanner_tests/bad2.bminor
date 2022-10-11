@@ -1,0 +1,2 @@
+// using a reserved keyword for an ident
+for : integer = "no! this is not allowed";

@@ -1,0 +1,5 @@
+// testing parentheses and function calls
+main: function void () = {
+    abc('h', "hello", 234, 4/2/d/s/e+23-23%dfjd*3);
+    print 'a', 'b', 'c', "dog", 3, hello;
+    hello = (-((((woah))) + (((((((((((42)))-3))))-ohwow))))));}

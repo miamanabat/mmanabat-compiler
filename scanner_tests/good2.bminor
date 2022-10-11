@@ -1,0 +1,7 @@
+// more arithmetic tests
+
+main: function integer () = {
+    yo : array['b'%3] void = -(-(-number));
+    inc/dec = inc++ - dec--;
+    'a' = 35 + '\n';
+}

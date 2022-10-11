@@ -1,0 +1,4 @@
+// function call with a list that has an extra comma
+main: function void () ={
+main(2,3,);
+      }

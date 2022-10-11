@@ -1,0 +1,6 @@
+/* working on the array indexing */
+func: function integer () = {
+    x: array[23435] string = {3,4,5};
+    y = x[3][fdkje][5849][-1-3-5];
+    return true;
+}

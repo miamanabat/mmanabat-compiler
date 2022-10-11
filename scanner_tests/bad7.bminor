@@ -1,0 +1,7 @@
+// for loop with one less param
+func : function void () = {
+
+           for (;) {
+                x = y ^ 8;
+           }
+       }

@@ -11,9 +11,9 @@ IDENT ({LETTER}|_)+({LETTER}|{DIGIT}|_)*
 [[:space:]] /* skip whitespace */
 
 
-{MULTI_COMMENT} { return TOKEN_MULTI_COMMENT; } /* strings, comments, chars */
+{MULTI_COMMENT}  /* strings, comments, chars */
 
-\/\/[^\n]*\n    { return TOKEN_SINGLE_COMMENT; }
+\/\/[^\n]*\n    
 {STRING}        { return TOKEN_STRING; }
 
 \'\'            { return TOKEN_ERROR_CHAR; }
@@ -43,12 +43,12 @@ false           { return TOKEN_FALSE; }
 :               { return TOKEN_COLON; }
 ;               { return TOKEN_SEMICOLON; }
 ,               { return TOKEN_COMMA; }
-\[              { return TOKEN_OPEN_SQUARE_BRACKET; }
-\]              { return TOKEN_CLOSE_SQUARE_BRACKET; }
-\{              { return TOKEN_OPEN_CURLY_BRACE; }
-\}              { return TOKEN_CLOSE_CURLY_BRACE; }
-\(              { return TOKEN_OPEN_PARENTHESES; }
-\)              { return TOKEN_CLOSE_PARENTHESES; }
+\[              { return TOKEN_LBRACKET; }
+\]              { return TOKEN_RBRACKET; }
+\{              { return TOKEN_LBRACE; }
+\}              { return TOKEN_RBRACE; }
+\(              { return TOKEN_LPAREN; }
+\)              { return TOKEN_RPAREN; }
 \=              { return TOKEN_ASSIGNMENT; }
 \^              { return TOKEN_EXPONENT; }
 \+\+            { return TOKEN_INCREMENT; }
@@ -65,8 +65,7 @@ false           { return TOKEN_FALSE; }
 \>              { return TOKEN_GT; }
 \!\=            { return TOKEN_NE; }
 \!              { return TOKEN_NOT; }
-<<EOF>>         { return TOKEN_EOF; }
-[+-]?{DIGIT}+   { return TOKEN_NUMBER; }
+{DIGIT}+        { return TOKEN_NUMBER; }
 {IDENT}         { return TOKEN_IDENT; }
 
 .               { return TOKEN_ERROR_INVALID; } /* anything else is invalid */
