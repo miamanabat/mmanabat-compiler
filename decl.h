@@ -14,10 +14,13 @@ struct decl {
 	struct stmt *code;
 	struct symbol *symbol;
 	struct decl *next;
+    int func_def;
 };
 
 struct decl * decl_create( char *name, struct type *type, struct expr *value, struct stmt *code, struct decl *next );
+struct decl * decl_func_def_create(char *name, struct type *type, struct expr *value, struct stmt *code, struct decl *next);
 void decl_print( struct decl *d, int indent );
+void indent_print( int indent );
 
 #endif
 

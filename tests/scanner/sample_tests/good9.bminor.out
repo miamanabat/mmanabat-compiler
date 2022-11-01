@@ -1,0 +1,26 @@
+IDENTIFIER                              a
+INTEGER_LITERAL                         5
+STRING LITERAL           a >= 5
+IDENTIFIER                              a
+INTEGER_LITERAL                         5
+STRING LITERAL            a > 5
+IDENTIFIER                              a
+INTEGER_LITERAL                         5
+STRING LITERAL           a <= 5
+IDENTIFIER                              a
+INTEGER_LITERAL                         5
+STRING LITERAL            a < 5
+IDENTIFIER                              a
+INTEGER_LITERAL                         5
+STRING LITERAL           a == 5
+IDENTIFIER                              a
+INTEGER_LITERAL                         5
+STRING LITERAL           a != 5
+IDENTIFIER                              a
+INTEGER_LITERAL                         5
+IDENTIFIER                              a
+IDENTIFIER                              b
+STRING LITERAL        a || b is true
+IDENTIFIER                              a
+IDENTIFIER                              b
+STRING LITERAL        a && b is true

@@ -1,0 +1,12 @@
+IDENTIFIER                            str
+STRING LITERAL                 
+IDENTIFIER                            str
+STRING LITERAL       we can write an escaped backslash \
+STRING LITERAL        "this is a unique test case " 
+STRING LITERAL             
+ t 
+STRING LITERAL            e r y
+IDENTIFIER                            str
+STRING LITERAL       single qoute ' or ' 
+IDENTIFIER                            str
+STRING LITERAL        double qoute " 

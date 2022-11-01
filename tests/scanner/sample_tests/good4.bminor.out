@@ -1,0 +1,15 @@
+IDENTIFIER                      character
+CHARACTER LITERAL             c
+IDENTIFIER                      character
+CHARACTER LITERAL    
+
+IDENTIFIER                      character
+CHARACTER LITERAL    IDENTIFIER                      character
+CHARACTER LITERAL                       6
+CHARACTER LITERAL             \
+IDENTIFIER                      character
+CHARACTER LITERAL                       c
+CHARACTER LITERAL             \
+IDENTIFIER                      character
+CHARACTER LITERAL                       t
+CHARACTER LITERAL             \

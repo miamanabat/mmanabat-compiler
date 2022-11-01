@@ -1,11 +1,13 @@
 #include "token.h"
 #include "string.h"
+#include "decl.h"
 #include <stdio.h>
 #include <stdlib.h>
 extern FILE *yyin;
 extern int yylex();
 extern char *yytext;
 extern int yyparse();
+extern struct decl* d;
 typedef enum yytokentype token_t;
 
 #define TOKEN_EOF 0
@@ -18,6 +20,9 @@ void usage(const char *program) {
     fprintf(stderr, "Usage: %s [options]\n\n", program);
     fprintf(stderr, "Options:\n");
     fprintf(stderr, "    -scan FILE           run scanner on FILE\n");
+    fprintf(stderr, "    -parse FILE           run parser on FILE\n");
+    fprintf(stderr, "    -print FILE           run printer on FILE\n");
+
 }
 
 void print_stripped_str(char * string_literal) {
@@ -84,19 +89,10 @@ int scan (){
                 print_stripped_str(yytext);
             }
         }
-        else if (t == TOKEN_CHAR) {
-            print_char(yytext);
-        } else if (t == TOKEN_NUMBER) {
-            printf("%-20s %20s\n", "TOKEN_NUMBER", yytext);
-        } else if (t == TOKEN_IDENT) {
-            printf("%-20s %20s\n", "TOKEN_IDENT", yytext);
-        } else if (t == TOKEN_ERROR_CHAR) {
-            fprintf(stderr, "%-20s %20s\n", "TOKEN ERROR CHAR", yytext);
-            exit(EXIT_FAILURE);
-        } else if (t == TOKEN_ERROR_INVALID) {
-            fprintf(stderr, "%-20s %20s\n", "TOKEN ERROR INVALID", yytext);
-            exit(EXIT_FAILURE);
-        } else if (t == TOKEN_MULTI_COMMENT) printf("%-20s\n", "MULTILINE COMMENT");
+        else if (t == TOKEN_CHAR) print_char(yytext);
+        else if (t == TOKEN_NUMBER) printf("%-20s %20s\n", "TOKEN_NUMBER", yytext);
+        else if (t == TOKEN_IDENT) printf("%-20s %20s\n", "TOKEN_IDENT", yytext);
+        else if (t == TOKEN_MULTI_COMMENT) printf("%-20s\n", "MULTILINE COMMENT");
         else if (t == TOKEN_SINGLE_COMMENT) printf("%-20s\n", "SINGLE COMMENT");
         else if (t == TOKEN_ARRAY) printf("%-20s\n", "ARRAY KEYWORD");
         else if (t == TOKEN_AUTO) printf("%-20s\n", "AUTO KEYWORD");
@@ -142,14 +138,19 @@ int scan (){
         else if (t == TOKEN_GT) printf("%-20s\n", "GT");
         else if (t == TOKEN_NE) printf("%-20s\n", "NE");
         else if (t == TOKEN_NOT) printf("%-20s\n", "NOT");
-
+        else if (t == TOKEN_ERROR_CHAR) {
+            fprintf(stderr, "%-20s %20s\n", "TOKEN ERROR CHAR", yytext);
+            exit(EXIT_FAILURE);
+        } else if (t == TOKEN_ERROR_INVALID) {
+            fprintf(stderr, "%-20s %20s\n", "TOKEN ERROR INVALID", yytext);
+            exit(EXIT_FAILURE);
+        }
     }
     exit(EXIT_SUCCESS);
 }
 
 int parse() {
     int y = yyparse();
-    printf("%d\n", y);
     if  (!y) {
         printf("parse successful!\n");
         return 0;
@@ -157,6 +158,17 @@ int parse() {
         printf("parse failed.\n");
         return 1;
     }
+}
+
+int print() {
+    int y = yyparse();
+    if (y) {
+        printf("parse failed.\n");
+        return 1;
+    }
+
+    decl_print(d, 0);
+    return 0;
 }
 
 int main(int argc, char*argv[]) {
@@ -186,6 +198,16 @@ int main(int argc, char*argv[]) {
             }
             return parse();
             
+        } else if (strcmp(argv[argind], "-print") == 0) {
+            opt = argv[argind++];
+            file = argv[argind];
+            yyin = fopen(file, "r");
+            if (!yyin) {
+                usage(argv[0]);
+                return 1;
+            }
+
+            return print();
         } else {
             usage(argv[0]);
             return 1;

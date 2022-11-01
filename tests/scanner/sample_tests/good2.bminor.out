@@ -1,0 +1,13 @@
+IDENTIFIER                         number
+IDENTIFIER                         number
+INTEGER_LITERAL                        56
+IDENTIFIER                         number
+INTEGER_LITERAL                       -56
+IDENTIFIER                         number
+INTEGER_LITERAL                       +56
+IDENTIFIER                         number
+INTEGER_LITERAL                   0005006
+IDENTIFIER                         number
+INTEGER_LITERAL                  +0005006
+IDENTIFIER                         number
+INTEGER_LITERAL                -000050006

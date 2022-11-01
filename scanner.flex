@@ -16,7 +16,7 @@ IDENT ({LETTER}|_)+({LETTER}|{DIGIT}|_)*
 \/\/[^\n]*\n    
 {STRING}        { return TOKEN_STRING; }
 
-\'\'            { return TOKEN_ERROR_CHAR; }
+\'\'            { return TOKEN_ERROR_CHAR; }  
 \'(((\\)?[^\\\'])|(\\\')|(\\\\))\'        { return TOKEN_CHAR; }
 
 array           { return TOKEN_ARRAY; }  /* keywords */

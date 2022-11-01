@@ -1,0 +1,23 @@
+IDENTIFIER                              f
+INTEGER_LITERAL                         5
+INTEGER_LITERAL                         1
+INTEGER_LITERAL                         2
+INTEGER_LITERAL                         3
+INTEGER_LITERAL                         4
+INTEGER_LITERAL                         5
+IDENTIFIER                              f
+INTEGER_LITERAL                         5
+CHARACTER LITERAL             a
+CHARACTER LITERAL             b
+CHARACTER LITERAL             c
+CHARACTER LITERAL             d
+CHARACTER LITERAL             e
+IDENTIFIER                              f
+INTEGER_LITERAL                         5
+IDENTIFIER                              f
+STRING LITERAL             this
+STRING LITERAL                i
+STRING LITERAL                s
+STRING LITERAL               a,
+STRING LITERAL             test
+STRING LITERAL                .
