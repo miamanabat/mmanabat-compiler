@@ -511,6 +511,8 @@ struct type * expr_typecheck( struct expr *e  ) {
                 }
                 // update the symbol of the auto var to the type of the right
                 printf("notice: %s is now of type ", e->left->name);
+                type_print(rt);
+                printf("\n");
 
             } else if (type_compare(lt, rt, 0)) {
                 // left must be ident and match

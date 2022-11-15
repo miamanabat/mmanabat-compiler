@@ -179,6 +179,9 @@ void stmt_typecheck(struct stmt *s, struct decl *decl) {
                     typecheck_error = 1;
                 } else if (decl->symbol->type->subtype->kind == TYPE_AUTO) {
                 // if function return type is auto, then assign return type to that type
+                    printf("notice: return type of function %s is ", decl->symbol->name);
+                    type_print(t);
+                    printf("\n");
                     decl->symbol->type->subtype = type_copy(t); 
                 } else if (type_compare(t, decl->symbol->type->subtype, 0)) {
                 // if types are not the same, print error
