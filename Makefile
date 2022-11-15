@@ -31,10 +31,19 @@ expr.o: expr.c
 param_list.o: param_list.c
 	gcc -c param_list.c -o param_list.o
 
-bminor: parser.o scanner.o main.o type.o decl.o stmt.o expr.o param_list.o
-	gcc scanner.o parser.o main.o type.o decl.o stmt.o expr.o param_list.o -o bminor
+symbol.o: symbol.c
+	gcc -c symbol.c -o symbol.o
+
+scope.o: scope.c
+	gcc -c scope.c -o scope.o
+
+hash_table.o: hash_table.c
+	gcc -c hash_table.c -o hash_table.o
+
+bminor: parser.o scanner.o main.o type.o expr.o decl.o stmt.o param_list.o symbol.o scope.o hash_table.o
+	gcc scanner.o parser.o main.o type.o decl.o stmt.o expr.o param_list.o symbol.o scope.o hash_table.o -o bminor
 
 clean:
 	@echo "Removing objects"
-	rm token.h scanner.o parser.o main.o type.o decl.o stmt.o expr.o param_list.o scanner.c parser.c parser.output *.out bminor
+	rm -f token.h scanner.o parser.o main.o type.o decl.o stmt.o expr.o param_list.o symbol.o scope.o hash_table.o scanner.c parser.c parser.output *.out bminor
 

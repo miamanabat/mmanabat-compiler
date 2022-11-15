@@ -2,7 +2,9 @@
 #define EXPR_H
 
 #include "symbol.h"
+#include "scope.h"
 
+struct scope;
 typedef enum {
     EXPR_ASSIGNMENT=0,
     EXPR_TERNARY,
@@ -63,7 +65,7 @@ struct expr {
 
 struct expr * expr_create( expr_t kind, struct expr *left, struct expr *right );
 struct expr * expr_create_ternary( struct expr *left, struct expr *mid, struct expr *right );
-struct expr * expr_create_func_call(char *n, struct expr * expr);
+struct expr * expr_create_func_call( char *n, struct expr * expr );
 
 struct expr * expr_create_name( const char *n );
 struct expr * expr_create_integer_literal( int c );
@@ -71,8 +73,14 @@ struct expr * expr_create_boolean_literal( int c );
 struct expr * expr_create_char_literal( const char *c );
 struct expr * expr_create_string_literal( const char *str );
 
-void compare_precedence(struct expr* expr, expr_t kind, int eq_not_needed);
+void compare_precedence( struct expr* expr, expr_t kind, int eq_not_needed );
 
 void expr_print( struct expr *e );
+void expr_resolve( struct scope *s, struct expr *e );
+struct type * expr_typecheck( struct expr *e );
+void expr_type_print( struct expr *e, struct type *t );
+int check_arr_types(struct expr *e);
+int count_expr_list( struct expr *e);
 
+struct expr * expr_copy( struct expr *e );
 #endif

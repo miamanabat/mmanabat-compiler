@@ -1,6 +1,8 @@
 #include "token.h"
 #include "string.h"
+#include "scope.h"
 #include "decl.h"
+#include "hash_table.h"
 #include <stdio.h>
 #include <stdlib.h>
 extern FILE *yyin;
@@ -9,7 +11,8 @@ extern char *yytext;
 extern int yyparse();
 extern struct decl* d;
 typedef enum yytokentype token_t;
-
+int typecheck_error;
+int resolve_error;
 #define TOKEN_EOF 0
    
 /**
@@ -20,9 +23,10 @@ void usage(const char *program) {
     fprintf(stderr, "Usage: %s [options]\n\n", program);
     fprintf(stderr, "Options:\n");
     fprintf(stderr, "    -scan FILE           run scanner on FILE\n");
-    fprintf(stderr, "    -parse FILE           run parser on FILE\n");
-    fprintf(stderr, "    -print FILE           run printer on FILE\n");
-
+    fprintf(stderr, "    -parse FILE          run parser on FILE\n");
+    fprintf(stderr, "    -print FILE          run printer on FILE\n");
+    fprintf(stderr, "    -resolve FILE        run resolve on FILE\n");
+    fprintf(stderr, "    -typecheck FILE      run typecheck on FILE\n");
 }
 
 void print_stripped_str(char * string_literal) {
@@ -171,6 +175,29 @@ int print() {
     return 0;
 }
 
+int resolve() {
+    int y = yyparse();
+    if (y) {
+        printf("parse failed.\n");
+        return 1;
+    }
+    resolve_error = 0;
+    struct scope *s = scope_create(1, hash_table_create(0,0), 0, 0);
+    decl_resolve(s, d);
+    return resolve_error;
+}
+
+int typecheck() {
+    int r = resolve();
+    if (r) {
+        printf("resolve failed.\n");
+        return 1;
+    }
+    typecheck_error = 0;
+    decl_typecheck(d);
+    return typecheck_error;
+}
+
 int main(int argc, char*argv[]) {
     int argind = 1;
     char *opt;
@@ -179,7 +206,7 @@ int main(int argc, char*argv[]) {
     while (argind < argc && strlen(argv[argind]) > 1 && argv[argind][0] == '-')
     {
         if (strcmp(argv[argind], "-scan") == 0) {
-            opt = argv[argind++];
+            argind++;
             file = argv[argind];
             yyin = fopen(file, "r");
             if (!yyin) {
@@ -189,7 +216,7 @@ int main(int argc, char*argv[]) {
             return scan();
 
         } else if (strcmp(argv[argind],"-parse") == 0) {
-            opt = argv[argind++];
+            argind++;
             file = argv[argind];
             yyin = fopen(file, "r");
             if (!yyin) {
@@ -199,21 +226,38 @@ int main(int argc, char*argv[]) {
             return parse();
             
         } else if (strcmp(argv[argind], "-print") == 0) {
-            opt = argv[argind++];
+            argind++;
             file = argv[argind];
             yyin = fopen(file, "r");
             if (!yyin) {
                 usage(argv[0]);
                 return 1;
             }
-
             return print();
+
+        } else if (strcmp(argv[argind], "-resolve") == 0) {
+            argind++;
+            file = argv[argind];
+            yyin = fopen(file, "r");
+            if (!yyin) {
+                usage(argv[0]);
+                return 1;
+            }
+            return resolve();
+        } else if (strcmp(argv[argind], "-typecheck") == 0) {
+            argind++;
+            file = argv[argind];
+            yyin = fopen(file, "r");
+            if (!yyin) {
+                usage(argv[0]);
+                return 1;
+            }
+            return typecheck();
         } else {
             usage(argv[0]);
             return 1;
         }
     }
-   
 }
 
 
