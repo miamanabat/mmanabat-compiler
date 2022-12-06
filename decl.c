@@ -1,9 +1,12 @@
 #include "decl.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 extern int typecheck_error;
 extern int resolve_error;
+extern int codegen_error;
+extern FILE *fp;
 
 struct decl * decl_create( char *name, struct type *type, struct expr *value, struct stmt *code, struct decl *next ) {
     struct decl* d = malloc(sizeof(struct decl));
@@ -14,6 +17,8 @@ struct decl * decl_create( char *name, struct type *type, struct expr *value, st
     d->symbol = NULL;
     d->next = next;
     d->func_def = 0;
+    d->param_count = 0;
+    d->local_count = 0;
     return d;
 }
 
@@ -63,8 +68,7 @@ void decl_resolve(struct scope *s, struct decl *d) {
         SYMBOL_LOCAL : SYMBOL_GLOBAL;
 
     d->symbol = symbol_create(kind,d->type,d->name); 
-    d->symbol->which = s->var_count;
-    inc_var_counter(s);
+    d->symbol->which = inc_var_counter(s);
     
     expr_resolve(s, d->value);
 
@@ -74,7 +78,7 @@ void decl_resolve(struct scope *s, struct decl *d) {
         if (d->type->kind == TYPE_FUNCTION) {
             // check return type
             struct symbol *symbol = scope_lookup(s, d->name);
-            if (type_compare(d->type->subtype, symbol->type->subtype, 0)) {
+            if (type_compare(&(d->type->subtype), &(symbol->type->subtype), 0)) {
                 printf("%s is already defined with a different return type of ", d->name);
                 type_print(symbol->type->subtype);
                 printf("\n");
@@ -91,7 +95,6 @@ void decl_resolve(struct scope *s, struct decl *d) {
                 resolve_error = 1;
             }
 
-            // might neeed to check for whether it is defined and if it is then you have to say error? might be in typechecking
         } else {
             printf("%s is already defined\n", d->name); 
             resolve_error = 1;
@@ -100,12 +103,13 @@ void decl_resolve(struct scope *s, struct decl *d) {
     // function: enter scope, resolve things
     if(d->code) {
         d->symbol->defined = 1;
+        d->code->in_func = 1;
         scope_enter(s);
-        param_list_resolve(s->next, d->type->params);
-        reset_var_counter(s->next);
+        param_list_resolve(s->next, d->type->params, d);
+        d->param_count = s->next->var_count;
         stmt_resolve(s->next, d->code);
+        d->local_count = s->next->var_count - d->param_count;
         scope_exit(s->next);
-        
     }
     decl_resolve(s, d->next);
 }
@@ -135,6 +139,7 @@ void decl_typecheck( struct decl *d ) {
         }
         if (d->symbol->kind == SYMBOL_LOCAL) {
             printf("type error: cannot declare array (%s) in local scope\n", d->symbol->name);
+            typecheck_error = 1;
         }
     } else if (d->symbol->type->kind == TYPE_FUNCTION) {
         // if function, check param_list for any autos
@@ -167,7 +172,7 @@ void decl_typecheck( struct decl *d ) {
             }
         } 
         // check types of d and d value
-        if (type_compare(d->symbol->type, t, 1)) {
+        if (type_compare(&(d->symbol->type), &t, 1)) {
             printf("type error: cannot declare a type ");
             type_print(d->symbol->type);
             printf(" to be");
@@ -187,7 +192,7 @@ void decl_typecheck( struct decl *d ) {
             typecheck_error = 1;
         }
         stmt_typecheck(d->code, d);
-        if (return_type->kind != TYPE_VOID && d->return_exists == 0) {
+        if (return_type->kind != TYPE_VOID && d->return_exists == 0 && strcmp(d->name, "main") != 0) {
             printf("type error: no return statement for a non-void function\n");
             typecheck_error = 1;
         }
@@ -195,4 +200,169 @@ void decl_typecheck( struct decl *d ) {
     }
     decl_typecheck(d->next);
     
+}
+
+
+void decl_codegen( struct decl *d ) {
+    if (!d) return;
+    switch (d->symbol->kind) {
+        case SYMBOL_GLOBAL:
+            switch (d->symbol->type->kind) {
+                case TYPE_STRING:
+                    fprintf(fp, ".data\n");
+                    fprintf(fp, ".global %s\n", symbol_codegen(d->symbol));
+                    fprintf(fp, "%s:\n", symbol_codegen(d->symbol));
+                    if (!d->value) fprintf(fp, ".quad 0\n");
+                    else {
+                        int label = label_create();
+                        fprintf(fp, ".quad %s\n",
+                                label_name(label));
+
+                        fprintf(fp, ".data\n");
+                        fprintf(fp, ".global %s\n", label_name(label));
+                        fprintf(fp, "%s:\n", label_name(label));
+
+                        fprintf(fp, ".string %s\n", d->value->string_literal); 
+                    }
+                    break;
+                case TYPE_BOOLEAN:
+                    global_label(d);
+                    fprintf(fp, ".quad %d\n", (d->value ? d->value->literal_value : 0));
+                    break;
+                case TYPE_CHARACTER:
+                    global_label(d);
+                    {
+                        if (d->value) {
+                            char c = d->value->char_literal[1];
+                            fprintf(fp, ".quad %d\n", c);
+                        } else {
+                            fprintf(fp, ".quad 0\n");
+                        }
+                    }
+                    break;
+                case TYPE_INTEGER:
+                    global_label(d);
+                    fprintf(fp, ".quad %d\n", (d->value ? d->value->literal_value : 0));
+                    break;
+                case TYPE_ARRAY:
+                    global_label(d);
+                    decl_codegen_arr(d, d->value);
+                    break;
+                case TYPE_FUNCTION:
+                    if (d->code) {
+                        global_label(d);
+                        func_prologue(d);
+                        stmt_codegen(d->code);
+                        func_epilogue(d);
+                    }
+                    break;
+                case TYPE_AUTO: 
+                    break;
+            }
+            break;
+        case SYMBOL_PARAM:
+        case SYMBOL_LOCAL:
+            switch (d->symbol->type->kind) {
+                case TYPE_STRING:
+                case TYPE_BOOLEAN:
+                case TYPE_CHARACTER:
+                case TYPE_INTEGER:
+                    if (d->value) {
+                        expr_codegen(d->value);
+                        fprintf(fp, "\tmovq %s, %s\n", 
+                                scratch_name(d->value->reg), 
+                                symbol_codegen(d->symbol));
+                        scratch_free(d->value->reg);
+                    } 
+                    break;
+                case TYPE_ARRAY:
+                    printf("error: local array declaration not allowed\n");
+                    break;
+
+                case TYPE_FUNCTION:
+                    printf("error: local function declaration not allowed\n");
+                    break;
+                case TYPE_AUTO:
+                    // illegal !! >:(
+                    break;
+            } 
+            break;
+    }
+   decl_codegen(d->next); 
+}
+
+void global_label( struct decl *d ) {
+    if (!d) return;
+    if (d->symbol->type->kind == TYPE_FUNCTION) {
+        fprintf(fp, ".text\n");
+        fprintf(fp, ".global %s\n", d->name);
+        fprintf(fp, "%s:\n", d->name);
+    } else {
+        fprintf(fp, ".data\n");
+        fprintf(fp, ".global %s\n", d->name);
+        fprintf(fp, "%s:\n", d->name);
+    }
+}
+
+void func_prologue(struct decl *d) {
+    if (!d) return;
+    fprintf(fp, "\tpushq %%rbp\n");
+    fprintf(fp, "\tmovq %%rsp, %%rbp\n\n");
+
+        // save the arguments
+        for (int i = 0; i < d->param_count; i++) {
+            fprintf(fp, "\tpushq %s\n", arg_name(i));
+        }
+
+        // allocate space for local variables
+        fprintf(fp, "\tsubq $%d, %%rsp\n", d->local_count * 8 );
+
+    if (strcmp(d->name, "main") != 0) {
+
+        // save callee saved registers
+        fprintf(fp, "\tpushq %%rbx\n");
+        fprintf(fp, "\tpushq %%r12\n");
+        fprintf(fp, "\tpushq %%r13\n");
+        fprintf(fp, "\tpushq %%r14\n");
+        fprintf(fp, "\tpushq %%r15\n");
+    }
+}
+
+void func_epilogue( struct decl *d ) {
+    fprintf(fp, ".%s_epilogue:\n", d->name);
+
+    // restore callee-saved registers
+    fprintf(fp, "\tpopq %%r15\n");
+    fprintf(fp, "\tpopq %%r14\n");
+    fprintf(fp, "\tpopq %%r13\n");
+    fprintf(fp, "\tpopq %%r12\n");
+    fprintf(fp, "\tpopq %%rbx\n");
+
+    // reset stack to base pointer
+    fprintf(fp, "\tmovq %%rbp, %%rsp\n");
+
+    // restore the old base pointer
+    fprintf(fp, "\tpopq %%rbp\n");
+
+    // return to caller
+    fprintf(fp, "\tret\n");
+}
+
+void decl_codegen_arr( struct decl *d, struct expr *e ) {
+    if (!d->value) {
+        for (int i = 0; i < d->symbol->type->arr_expr->literal_value; i++) {
+            fprintf(fp, ".quad 0\n");
+        }
+    }
+    if (!e) return;
+
+    struct expr * curr = e->left;
+    while (curr) {
+        if (curr->kind == EXPR_LIST) {
+            fprintf(fp, ".quad %d\n", curr->left->literal_value);
+        } else {
+            fprintf(fp, ".quad %d\n", curr->literal_value);
+        }
+        curr = curr->right;
+    }
 }

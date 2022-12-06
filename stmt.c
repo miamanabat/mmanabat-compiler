@@ -1,10 +1,12 @@
 
 #include "stmt.h"
 #include "decl.h"
+#include "scratch.h"
 #include <stdio.h>
 #include <stdlib.h>
 
 extern int typecheck_error;
+extern FILE *fp;
 
 struct stmt * stmt_create( stmt_t kind, struct decl *decl, struct expr *init_expr, struct expr *expr, struct expr *next_expr, struct stmt *body, struct stmt *else_body, struct stmt *next ) {
     struct stmt * s = malloc(sizeof(struct stmt));
@@ -17,6 +19,7 @@ struct stmt * stmt_create( stmt_t kind, struct decl *decl, struct expr *init_exp
     s->else_body = else_body;
     s->next = next;
     s->else_if = 0;
+    s->in_func = 0;
     return s; 
 }
 
@@ -99,14 +102,26 @@ void stmt_print( struct stmt *s, int indent ) {
 
 void stmt_resolve(struct scope *s, struct stmt *stmt) {
     if (!stmt) return;
+    int i;
     switch (stmt->kind) {
         case STMT_DECL:
             decl_resolve(s, stmt->decl);
             break;
         case STMT_BLOCK:
-            scope_enter(s);
-            stmt_resolve(s->next, stmt->body);
-            scope_exit(s->next);
+            i = s->var_count;
+            
+            if (stmt->in_func == 1) {
+                s->next->var_count = 0;
+                stmt_resolve(s->next, stmt->body);
+
+            } else {
+                scope_enter(s);
+                s->next->var_count = i;
+                stmt_resolve(s->next, stmt->body);
+                s->var_count = s->next->var_count;
+                scope_exit(s->next);
+
+            }
             break;
         case STMT_IF_ELSE:
             expr_resolve(s, stmt->expr);
@@ -164,6 +179,7 @@ void stmt_typecheck(struct stmt *s, struct decl *decl) {
             break;
         case STMT_RETURN:
             t = expr_typecheck(s->expr);
+            s->name = decl->name;
             if (t) {
                 if (decl->symbol->type->subtype->kind == TYPE_VOID) {
                 // if return type of void function is non-void
@@ -183,7 +199,7 @@ void stmt_typecheck(struct stmt *s, struct decl *decl) {
                     type_print(t);
                     printf("\n");
                     decl->symbol->type->subtype = type_copy(t); 
-                } else if (type_compare(t, decl->symbol->type->subtype, 0)) {
+                } else if (type_compare(&t, &(decl->symbol->type->subtype), 0)) {
                 // if types are not the same, print error
                     printf("type error: return type ");
                     expr_type_print(s->expr, t);
@@ -208,4 +224,128 @@ void stmt_typecheck(struct stmt *s, struct decl *decl) {
 }
 
 
-// make sure to check that there is something returned
+void stmt_codegen( struct stmt *s ) {
+    if(!s) return;
+
+    //printf("stmt %d\n", s->kind);
+    switch(s->kind) {
+        case STMT_DECL:
+            decl_codegen(s->decl);
+            break;
+
+        case STMT_EXPR:
+            expr_codegen(s->expr);
+            scratch_free(s->expr->reg);
+            break;
+
+        case STMT_IF_ELSE:
+            fprintf(fp, "# if statement!\n");
+            {
+            int else_label = label_create();
+            int done_label = label_create();
+            expr_codegen(s->expr);
+            fprintf(fp, "\tcmp $0, %s\n",scratch_name(s->expr->reg));
+            scratch_free(s->expr->reg);
+            fprintf(fp, "\tje %s\n",label_name(else_label));
+            stmt_codegen(s->body);
+            fprintf(fp, "\tjmp %s\n",label_name(done_label));
+            fprintf(fp, "# else body\n");
+            fprintf(fp, "%s:\n",label_name(else_label));
+            stmt_codegen(s->else_body);
+
+            fprintf(fp, "# done if statement\n");
+            fprintf(fp, "%s:\n",label_name(done_label));
+            }
+            break;
+
+        case STMT_FOR:
+            fprintf(fp, "# for loop\n");
+            if (s->init_expr) {
+                expr_codegen(s->init_expr);
+                scratch_free(s->init_expr->reg);
+            }
+            {
+                int top_label = label_create();
+                int done_label = label_create();
+                fprintf(fp, "%s:\n", label_name(top_label));
+                
+                // if there is a condition in for loop
+                if (s->expr) {
+                    expr_codegen(s->expr);
+                    fprintf(fp, "\tcmp $0, %s\n", 
+                        scratch_name(s->expr->reg));
+
+                    scratch_free(s->expr->reg);
+
+                    fprintf(fp, "\tje %s\n", label_name(done_label)); 
+                } 
+
+                stmt_codegen(s->body);
+
+                if (s->next_expr) {
+                    expr_codegen(s->next_expr);
+                    scratch_free(s->next_expr->reg);
+                }
+
+                fprintf(fp, "\tjmp %s\n", label_name(top_label));
+                fprintf(fp, "%s:\n", label_name(done_label));
+            }
+            break;
+
+        case STMT_PRINT: 
+            stmt_codegen_print(s->expr);
+            break;
+
+        case STMT_RETURN:
+            fprintf(fp, "# return statement\n");
+            expr_codegen(s->expr);
+            fprintf(fp, "\tmovq %s, %%rax\n", scratch_name(s->expr->reg));
+            fprintf(fp, "\tjmp .%s_epilogue\n", s->name); // figure out a way to pass this info down for the function name
+            scratch_free(s->expr->reg);
+            break;
+
+        case STMT_BLOCK:
+            stmt_codegen(s->body);
+            break;    
+    }
+    stmt_codegen(s->next);
+}
+
+void stmt_codegen_print( struct expr *e ) {
+    if (!e) return;
+    if (e->kind == EXPR_LIST) {
+        stmt_codegen_print(e->left);
+        stmt_codegen_print(e->right);
+        return;
+    } 
+
+    expr_codegen(e);
+    
+    // save r10 r11, store left into rdi
+    fprintf(fp, "\tpushq %%r10\n");
+    fprintf(fp, "\tpushq %%r11\n");
+
+    fprintf(fp, "\tmovq %s, %%rdi\n",
+            scratch_name(e->reg));
+    
+    switch (expr_typecheck(e)->kind) {
+        case TYPE_BOOLEAN:
+            fprintf(fp, "\tcall print_boolean\n");
+            break;
+        case TYPE_STRING:
+            fprintf(fp, "\tcall print_string\n");
+            break;
+        case TYPE_CHARACTER:
+            fprintf(fp, "\tcall print_character\n");
+            break;
+        case TYPE_INTEGER:
+            fprintf(fp, "\tcall print_integer\n");
+            break;
+    }
+    // restore r10, r11
+    fprintf(fp, "\tpopq %%r11\n");
+    fprintf(fp, "\tpopq %%r10\n");
+
+    scratch_free(e->reg);
+
+}

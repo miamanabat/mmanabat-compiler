@@ -40,10 +40,13 @@ scope.o: scope.c
 hash_table.o: hash_table.c
 	gcc -c hash_table.c -o hash_table.o
 
-bminor: parser.o scanner.o main.o type.o expr.o decl.o stmt.o param_list.o symbol.o scope.o hash_table.o
-	gcc scanner.o parser.o main.o type.o decl.o stmt.o expr.o param_list.o symbol.o scope.o hash_table.o -o bminor
+scratch.o: scratch.c
+	gcc -c scratch.c -o scratch.o
+
+bminor: parser.o scanner.o main.o type.o expr.o decl.o stmt.o param_list.o symbol.o scope.o hash_table.o scratch.o
+	gcc scanner.o parser.o main.o type.o decl.o stmt.o expr.o param_list.o symbol.o scope.o hash_table.o scratch.o -o bminor
 
 clean:
 	@echo "Removing objects"
-	rm -f token.h scanner.o parser.o main.o type.o decl.o stmt.o expr.o param_list.o symbol.o scope.o hash_table.o scanner.c parser.c parser.output *.out bminor
+	rm -f token.h scanner.o parser.o main.o type.o decl.o stmt.o expr.o param_list.o symbol.o scope.o hash_table.o scratch.o scanner.c parser.c parser.output *.out bminor
 

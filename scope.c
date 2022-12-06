@@ -8,7 +8,8 @@ struct scope *scope_create(int level, struct hash_table *hash_table, struct scop
     s->hash_table = hash_table;
     s->prev = prev;
     s->next = next;
-    s->var_count = 1;
+    s->var_count = 0;
+    s->param_count = 0;
     return s;
 }
 void scope_enter(struct scope *s) {
@@ -54,10 +55,11 @@ struct symbol *scope_lookup_current( struct scope *s, const char *name  ) {
     return hash_table_lookup(s->hash_table, name);
 }
 
-void inc_var_counter( struct scope *s ) {
+int inc_var_counter( struct scope *s ) {
     s->var_count += 1;
+    return s->var_count;
 }
 
 void reset_var_counter( struct scope *s ) {
-    s->var_count = 1;
+    s->var_count = 0;
 }

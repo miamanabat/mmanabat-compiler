@@ -27,7 +27,7 @@ struct type * type_create( type_t kind, struct type *subtype, struct expr *arr_e
 void          type_print( struct type *t );
 
 struct type * type_copy( struct type *t );
-int type_compare( struct type *a, struct type *b, int change );
+int type_compare( struct type **a1, struct type **b1, int change );
 
 
 #endif

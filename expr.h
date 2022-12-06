@@ -2,6 +2,7 @@
 #define EXPR_H
 
 #include "symbol.h"
+#include "scratch.h"
 #include "scope.h"
 
 struct scope;
@@ -61,6 +62,7 @@ struct expr {
 	const char * string_literal;
     const char * char_literal;
 	struct symbol *symbol;
+    int reg;
 };
 
 struct expr * expr_create( expr_t kind, struct expr *left, struct expr *right );
@@ -83,4 +85,14 @@ int check_arr_types(struct expr *e);
 int count_expr_list( struct expr *e);
 
 struct expr * expr_copy( struct expr *e );
+
+void expr_codegen( struct expr *e );
+
+void expr_codegen_comp( struct expr *e, char *comp );
+
+void expr_codegen_funccall(struct expr *e, char *name );
+
+void expr_codegen_incdec(struct expr *e, char * command);
+
+void expr_codegen_comp_str(struct expr *e, char *name);
 #endif

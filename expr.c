@@ -4,6 +4,7 @@
 
 extern int typecheck_error;
 extern int resolve_error;
+extern FILE *fp;
 
 struct expr * expr_create( expr_t kind, struct expr *left, struct expr *right ) {
     struct expr* e = malloc(sizeof(struct expr));
@@ -272,7 +273,8 @@ struct type * expr_typecheck( struct expr *e  ) {
             // create param list from expr list and check params
             params = param_list_from_exprlist(e->right);
             param_list_compare(params, e->left->symbol->type->params, 0); // return error code  
-            result = type_create(e->left->symbol->type->subtype->kind,0,0,0); 
+            result = type_copy(e->left->symbol->type->subtype);
+                //type_create(e->left->symbol->type->subtype->kind,0,0,0); 
             break;
                 
         case EXPR_ARR_INDEX:
@@ -285,7 +287,6 @@ struct type * expr_typecheck( struct expr *e  ) {
                     typecheck_error = 1;
                 }
                 result = type_copy(lt->subtype);
-                printf("indexing %d\n", lt->arr_expr->literal_value);
             } else {
                 // error: not an array
                 printf("type error: cannot index a variable of type ");
@@ -342,7 +343,7 @@ struct type * expr_typecheck( struct expr *e  ) {
             if (lt->kind != TYPE_INTEGER || rt->kind != TYPE_INTEGER) {
                 printf("type error: cannot modulo");
                 expr_type_print(e->left, lt);
-                printf("by");
+                printf(" by");
                 expr_type_print(e->right, rt);
                 printf("\n");
                 typecheck_error = 1;
@@ -354,7 +355,7 @@ struct type * expr_typecheck( struct expr *e  ) {
             if (lt->kind != TYPE_INTEGER || rt->kind != TYPE_INTEGER) {
                 printf("type error: cannot divide");
                 expr_type_print(e->left, lt);
-                printf("by");
+                printf(" by");
                 expr_type_print(e->right, rt);
                 printf("\n");
                 typecheck_error = 1;
@@ -366,7 +367,7 @@ struct type * expr_typecheck( struct expr *e  ) {
             if (lt->kind != TYPE_INTEGER || rt->kind != TYPE_INTEGER) {
                 printf("type error: cannot multiply");
                 expr_type_print(e->left, lt);
-                printf("by a");
+                printf(" by a");
                 expr_type_print(e->right, rt);
                 printf("\n");
                 typecheck_error = 1;
@@ -378,7 +379,7 @@ struct type * expr_typecheck( struct expr *e  ) {
             if (lt->kind != TYPE_INTEGER || rt->kind != TYPE_INTEGER) {
                 printf("type error: cannot subtract");
                 expr_type_print(e->left, lt);
-                printf("by");
+                printf(" by");
                 expr_type_print(e->right, rt);
                 printf("\n");
                 typecheck_error = 1;
@@ -390,7 +391,7 @@ struct type * expr_typecheck( struct expr *e  ) {
             if(lt->kind != TYPE_INTEGER || rt->kind != TYPE_INTEGER) {
                 printf("type error: cannot add");
                 expr_type_print(e->left, lt);
-                printf("to");
+                printf(" to");
                 expr_type_print(e->right, rt);
                 printf("\n");
                 typecheck_error = 1; 
@@ -405,7 +406,7 @@ struct type * expr_typecheck( struct expr *e  ) {
             if(lt->kind != TYPE_INTEGER || rt->kind != TYPE_INTEGER) {
                 printf("type error: cannot compare");
                 expr_type_print(e->left, lt);
-                printf("to");
+                printf(" to");
                 expr_type_print(e->right, rt);
                 printf("\n");
                 typecheck_error = 1;
@@ -415,10 +416,10 @@ struct type * expr_typecheck( struct expr *e  ) {
 
         case EXPR_EQ:
         case EXPR_NE:
-            if(type_compare(lt,rt,0)) {
+            if(type_compare(&lt,&rt,0)) {
                 printf("type error: cannot compare");
                 expr_type_print(e->left, lt);
-                printf("to");
+                printf(" to");
                 expr_type_print(e->right, rt);
                 printf("\n");
                 typecheck_error = 1;
@@ -426,7 +427,7 @@ struct type * expr_typecheck( struct expr *e  ) {
             if (lt->kind==TYPE_VOID || lt->kind==TYPE_ARRAY || lt->kind==TYPE_FUNCTION) {
                 printf("type error: cannot compare type ");
                 expr_type_print(e->left, lt);
-                printf("and");
+                printf(" and");
                 expr_type_print(e->right, rt);
                 printf("\n");            
                 typecheck_error = 1;
@@ -438,7 +439,7 @@ struct type * expr_typecheck( struct expr *e  ) {
             if (lt->kind != TYPE_BOOLEAN || rt->kind != TYPE_BOOLEAN) {
                 printf("type error: cannot AND");
                 expr_type_print(e->left, lt);
-                printf("and");
+                printf(" and");
                 expr_type_print(e->right, rt);
                 printf("\n");
                 typecheck_error = 1;
@@ -450,7 +451,7 @@ struct type * expr_typecheck( struct expr *e  ) {
             if (lt->kind != TYPE_BOOLEAN || rt->kind != TYPE_BOOLEAN) {
                 printf("type error: cannot OR");
                 expr_type_print(e->left, lt);
-                printf("and");
+                printf(" and");
                 expr_type_print(e->right, rt);
                 printf("\n");
                 typecheck_error = 1;
@@ -486,7 +487,7 @@ struct type * expr_typecheck( struct expr *e  ) {
                     typecheck_error = 1;
                 } 
                 // array type compared only with first expr in it here, array homogenous checked in array_init
-                else if (lt->subtype->kind != TYPE_AUTO && type_compare(lt->subtype, rt->subtype, 0)) {
+                else if (lt->subtype->kind != TYPE_AUTO && type_compare(&(lt->subtype), &(rt->subtype), 0)) {
                     printf("type error: array type ");
                     type_print(e->left->symbol->type->subtype);
                     printf(" does not match the element of type ");
@@ -514,7 +515,7 @@ struct type * expr_typecheck( struct expr *e  ) {
                 type_print(rt);
                 printf("\n");
 
-            } else if (type_compare(lt, rt, 0)) {
+            } else if (type_compare(&lt, &rt, 0)) {
                 // left must be ident and match
                 printf("type error: cannot assign");
                 expr_type_print(e->right, rt);
@@ -532,7 +533,7 @@ struct type * expr_typecheck( struct expr *e  ) {
                 typecheck_error = 1;
             } 
             mid = expr_typecheck(e->mid);
-            if (type_compare(mid, rt, 0)) {
+            if (type_compare(&mid, &rt, 0)) {
                 printf("type error: ternary middle expr");
                 expr_type_print(e->mid, mid);
                 printf("does not match last expr");
@@ -572,8 +573,12 @@ void expr_type_print(struct expr * e, struct type * t) {
 int check_arr_types(struct expr *e) {
     if (!e) return 0;
     if (!e->right) return 0;
+    
+    struct type *left = expr_typecheck(e->left);     
+    struct type *right = expr_typecheck(e->right);
+
     if (e->right->kind != EXPR_LIST) {
-        int ret = type_compare(expr_typecheck(e->left), expr_typecheck(e->right), 0);
+        int ret = type_compare(&left, &right, 0);
         if (ret) {
             printf("type error: array elements must be of the same type:");
             expr_type_print(e->left, expr_typecheck(e->left));
@@ -584,7 +589,8 @@ int check_arr_types(struct expr *e) {
         }
         return ret;
     }
-    if (type_compare(expr_typecheck(e->left), expr_typecheck(e->right->left), 0)) {
+    struct type *right_left = expr_typecheck(e->right->left);
+    if (type_compare(&left, &right_left, 0)) {
         printf("type error: arrays must be of the same element\n");
         typecheck_error = 1;
         return 1;
@@ -609,4 +615,519 @@ struct expr *expr_copy(struct expr *e) {
     copy->char_literal = e->char_literal;
     copy->symbol = e->symbol; 
     return copy;
+}
+
+
+void expr_codegen( struct expr *e ) {
+    if (!e) return;
+
+    switch (e->kind) {
+        // leaf node: allocate register and laod value
+        case EXPR_IDENT:
+            e->reg = scratch_alloc();
+            fprintf(fp, "\tmovq %s, %s\n",
+                    symbol_codegen(e->symbol),
+                    scratch_name(e->reg));
+        
+            break;
+            // Interior node: generate children, then add them.
+
+        case EXPR_OR:
+            expr_codegen(e->left);
+            expr_codegen(e->right);
+            fprintf(fp, "\tor %s, %s\n",
+                    scratch_name(e->left->reg),
+                    scratch_name(e->right->reg));
+            e->reg = e->right->reg;
+            scratch_free(e->left->reg);
+            break;
+        case EXPR_AND:
+            expr_codegen(e->left);
+            expr_codegen(e->right);
+            fprintf(fp, "\tand %s, %s\n",
+                    scratch_name(e->left->reg),
+                    scratch_name(e->right->reg));
+            e->reg = e->right->reg;
+            scratch_free(e->left->reg);
+            break;
+
+
+        case EXPR_EQ:
+            if (expr_typecheck(e->left)->kind == TYPE_STRING) {
+                expr_codegen_comp_str(e, "je");
+            } else {
+                expr_codegen_comp(e, "je");
+            }
+            break;
+        case EXPR_LE:
+            expr_codegen_comp(e, "jle");
+            break;
+        case EXPR_GE:
+            expr_codegen_comp(e, "jge");
+            break;
+        case EXPR_LT:
+            expr_codegen_comp(e, "jl");
+            break;
+        case EXPR_GT:
+            expr_codegen_comp(e, "jg"); 
+            break;
+        case EXPR_NE:
+            if (expr_typecheck(e->left)->kind == TYPE_STRING) {
+                expr_codegen_comp_str(e, "jne");
+            } else {
+                expr_codegen_comp(e, "jne");
+            }
+
+            break;
+
+
+        case EXPR_ADD:
+            expr_codegen(e->left);
+            expr_codegen(e->right);
+            fprintf(fp, "\taddq %s, %s\n",
+                scratch_name(e->left->reg),
+                scratch_name(e->right->reg));
+            e->reg = e->right->reg;
+            scratch_free(e->left->reg);
+            break;
+
+        case EXPR_SUB:
+            expr_codegen(e->left);
+            expr_codegen(e->right);
+            fprintf(fp, "\tsubq %s, %s\n",
+                scratch_name(e->right->reg),
+                scratch_name(e->left->reg));
+            e->reg = e->left->reg;
+            scratch_free(e->right->reg);
+            break;
+
+        case EXPR_MUL:
+            expr_codegen(e->left);
+            expr_codegen(e->right);
+            fprintf(fp, "\tmovq %s, %%rax\n",
+                    scratch_name(e->left->reg));
+            fprintf(fp, "\timulq %s\n", 
+                    scratch_name(e->right->reg));
+            fprintf(fp, "\tmovq %%rax, %s\n", 
+                    scratch_name(e->right->reg));
+            e->reg = e->right->reg;
+            scratch_free(e->left->reg);
+            break;
+
+        case EXPR_DIV:
+            expr_codegen(e->left);
+            expr_codegen(e->right);
+            fprintf(fp, "\tmovq %s, %rax\n",
+                    scratch_name(e->left->reg));
+            fprintf(fp, "\tcqo\n");
+            fprintf(fp, "idivq %s\n",
+                    scratch_name(e->right->reg));
+            fprintf(fp, "\tmovq %%rax, %s\n",
+                    scratch_name(e->right->reg));
+            e->reg = e->right->reg;
+            scratch_free(e->left->reg);
+            break;
+        
+        case EXPR_MOD:
+            expr_codegen(e->left);
+            expr_codegen(e->right);
+            fprintf(fp, "\tmovq %s, %rdx\n",
+                    scratch_name(e->left->reg));
+            fprintf(fp, "\tcqo\n");
+            fprintf(fp, "\tidivq %s\n",
+                    scratch_name(e->right->reg));
+            fprintf(fp, "\tmovq %%rdx, %s\n",
+                    scratch_name(e->right->reg));
+            e->reg = e->right->reg;
+            scratch_free(e->left->reg);
+            break;
+
+
+
+
+        case EXPR_EXP:
+            expr_codegen(e->left);
+            expr_codegen(e->right);
+           
+            // save r10 r11, store left into rdi, right into rsi 
+            fprintf(fp, "\tpushq %%r10\n");
+            fprintf(fp, "\tpushq %%r11\n");
+
+            fprintf(fp, "\tmovq %s, %%rdi\n",
+                    scratch_name(e->left->reg));
+            fprintf(fp, "\tmovq %s, %%rsi\n",
+                    scratch_name(e->right->reg));
+
+            // call integer_power function
+            fprintf(fp, "\tcall integer_power\n");
+
+            // restore r10, r11
+            fprintf(fp, "\tpopq %%r11\n");
+            fprintf(fp, "\tpopq %%r10\n");
+
+            fprintf(fp, "\tmovq %%rax, %s\n", 
+                    scratch_name(e->right->reg));
+            e->reg = e->right->reg;
+            scratch_free(e->left->reg);
+            break;
+
+
+        case EXPR_NOT:
+            e->reg = e->left->reg;
+            {
+                int else_label = label_create();
+                int done_label = label_create();
+                expr_codegen(e->left);
+                fprintf(fp, "\tcmp $0, %s\n",
+                        scratch_name(e->left->reg));
+                scratch_free(e->left->reg);
+                fprintf(fp, "\tje %s\n",label_name(else_label));
+                fprintf(fp, "\tmovq $0, %s\n", 
+                        scratch_name(e->left->reg));
+                fprintf(fp, "\tjmp %s\n",label_name(done_label));
+                fprintf(fp, "%s:\n",label_name(else_label));
+                fprintf(fp, "\tmovq $1, %s\n", 
+                        scratch_name(e->left->reg));
+                fprintf(fp, "%s:\n",label_name(done_label));
+            }
+            break;
+
+
+        case EXPR_NEGATE:
+            expr_codegen(e->left);
+            fprintf(fp, "\tnegq %s\n",
+                    scratch_name(e->left->reg));
+            e->reg = e->left->reg;
+            break;
+
+        case EXPR_DECREMENT:
+            expr_codegen_incdec(e, "subq");
+            break;
+             
+
+        case EXPR_INCREMENT:
+            expr_codegen_incdec(e, "addq");
+            break;
+
+
+        case EXPR_FUNC_CALL:
+            expr_codegen_funccall(e, e->left->symbol->name);
+            break;
+
+        case EXPR_ARR_INDEX:
+
+            e->reg = scratch_alloc();
+            expr_codegen(e->right);
+
+            // load address 
+            fprintf(fp, "\tlea %s, %s\n",
+                    e->left->symbol->name,
+                    scratch_name(e->reg));
+            // index
+            fprintf(fp, "\tmovq $8, %%rax\n");
+
+            fprintf(fp, "\timulq %s\n",
+                    scratch_name(e->right->reg));
+            fprintf(fp, "\taddq %s, %%rax\n",
+                    scratch_name(e->reg));
+
+            // get value
+            fprintf(fp, "\tmovq (%%rax), %s\n",
+                    scratch_name(e->reg));
+
+            scratch_free(e->right->reg); 
+            break;
+
+        case EXPR_NUMBER:
+            e->reg = scratch_alloc();
+            fprintf(fp, "\tmovq $%d, %s\n",
+                    e->literal_value,
+                    scratch_name(e->reg));
+            break;
+
+        case EXPR_STRING:
+            {
+                e->reg = scratch_alloc();
+                fprintf(fp, "\t.data\n");
+
+                int l = label_create();
+                fprintf(fp, "%s:\n", label_name(l));
+                fprintf(fp, "\t.string %s\n",
+                        e->string_literal);
+                fprintf(fp, ".text\n");
+                // need to move the value of the s to the register
+                fprintf(fp, "\tmovq $%s, %s\n",
+                    label_name(l),
+                    scratch_name(e->reg));
+            }
+            break;
+
+        case EXPR_CHAR:
+            {
+                char c = e->char_literal[1];
+                if (c=='\\') c = e->char_literal[2];
+                e->reg = scratch_alloc();
+            
+                fprintf(fp, "\tmovq $%d, %s\n",
+                    c,
+                    scratch_name(e->reg));
+            }
+            break;
+
+        case EXPR_BOOL:
+            e->reg = scratch_alloc();
+            fprintf(fp, "\tmovq $%d, %s\n",
+                    e->literal_value,
+                    scratch_name(e->reg));
+            break;
+    
+        case EXPR_TERNARY:
+            {
+                int else_label = label_create();
+                int done_label = label_create();
+                expr_codegen(e->left);
+                fprintf(fp, "\tcmp $0, %s\n",scratch_name(e->left->reg));
+                scratch_free(e->left->reg);
+                fprintf(fp, "\tje %s\n",label_name(else_label));
+                expr_codegen(e->mid);
+                scratch_free(e->mid->reg);
+                fprintf(fp, "\tjmp %s\n",label_name(done_label));
+                fprintf(fp, "%s:\n",label_name(else_label));
+                expr_codegen(e->right);
+                scratch_free(e->right->reg);
+                fprintf(fp, "%s:\n",label_name(done_label));
+            }
+            break;
+
+            // uhh might need to switch left and right or something
+        case EXPR_ASSIGNMENT:
+            e->reg = scratch_alloc();
+
+            // if left is an ident
+            if (e->left->kind == EXPR_IDENT) {
+                expr_codegen(e->left);
+                expr_codegen(e->right);
+                fprintf(fp, "\tmovq %s, %s\n",
+                        scratch_name(e->right->reg),
+                        symbol_codegen(e->left->symbol));
+
+                scratch_free(e->left->reg);
+                scratch_free(e->right->reg);
+
+
+            // if left is array index
+            } else if (e->left->kind == EXPR_ARR_INDEX) {
+                expr_codegen(e->left->right);
+                expr_codegen(e->right);
+                fprintf(fp, "\tleaq %s, %s\n",
+                        e->left->left->symbol->name,
+                        scratch_name(e->reg));
+                fprintf(fp, "\tmovq $8, %%rax\n");
+                fprintf(fp, "\timulq %s\n",
+                        scratch_name(e->left->right->reg));
+
+                fprintf(fp, "\taddq %s, %%rax\n",
+                        scratch_name(e->reg));
+                fprintf(fp, "\tmovq %s, (%%rax)\n",
+                        scratch_name(e->right->reg));
+
+                scratch_free(e->left->right->reg);
+                scratch_free(e->right->reg);
+            }
+            break;
+        case EXPR_ARR_INIT:
+        case EXPR_LIST:
+            break;
+    }
+}
+
+void expr_codegen_comp( struct expr *e, char *comp ) {
+    expr_codegen(e->left);
+    expr_codegen(e->right);
+
+    // compare the two registers
+    fprintf(fp, "\tcmp %s, %s\n", 
+            scratch_name(e->right->reg),
+            scratch_name(e->left->reg));
+
+    scratch_free(e->left->reg);
+    scratch_free(e->right->reg);
+
+    e->reg = scratch_alloc();
+
+    int comp_label = label_create();
+    int done_label = label_create();
+
+
+    // jump to compare if...
+    fprintf(fp, "\t%s %s\n",
+            comp,
+            label_name(comp_label));
+
+    // if false move 0 into the reg
+    fprintf(fp, "\tmovq $0, %s\n",
+            scratch_name(e->reg));
+
+    // jump to done
+    fprintf(fp, "\tjmp %s\n",label_name(done_label));
+    
+    
+    fprintf(fp, "%s:\n",label_name(comp_label));
+    // if true, move 1 into the reg
+    fprintf(fp, "\tmovq $1, %s\n",
+            scratch_name(e->reg));
+
+    // done label
+    fprintf(fp, "%s:\n",label_name(done_label));
+
+}
+
+void expr_codegen_funccall(struct expr *e, char * name) {
+    if (!e) return;
+    fprintf(fp, "# function called!\n");
+    // push caller saved
+    fprintf(fp, "\tpushq %%r10\n");
+    fprintf(fp, "\tpushq %%r11\n");
+
+    // pushing all arguments
+    struct expr * curr = e->right;
+    int i = 0;
+    // evaluate all args
+    while (curr) {
+        if (curr->kind == EXPR_LIST) {
+            expr_codegen(curr->left);
+        } else {
+            expr_codegen(curr);
+        }
+        curr = curr->right;
+    }
+    curr = e->right;
+
+    // put all the registers into args
+    while (curr) {
+    
+        if (curr->kind == EXPR_LIST) {
+            // put left into arg
+            fprintf(fp, "\tmovq %s, %s\n",
+                    scratch_name(curr->left->reg),
+                    arg_name(i));
+            scratch_free(curr->left->reg);
+            i++;
+        } else {
+            // put this one into arg
+            fprintf(fp, "\tmovq %s, %s\n",
+                    scratch_name(curr->reg),
+                    arg_name(i));
+            scratch_free(curr->reg);
+            i++;
+        }
+        curr = curr->right;
+    }
+
+    fprintf(fp, "\tcall %s\n", name);
+    
+    // restore r10, r11
+    fprintf(fp, "\tpopq %%r11\n");
+    fprintf(fp, "\tpopq %%r10\n");
+
+    e->reg = scratch_alloc();
+    // put the return value into the register
+    fprintf(fp, "\tmovq %%rax, %s\n", 
+                    scratch_name(e->reg));
+    fprintf(fp, "# function done!\n");
+
+}
+
+void expr_codegen_incdec(struct expr *e, char * command) {
+
+    if (e->left->kind == EXPR_IDENT) {
+        expr_codegen(e->left);
+        e->reg = scratch_alloc();
+
+        fprintf(fp, "\tmovq %s, %s\n",
+                scratch_name(e->left->reg),
+                scratch_name(e->reg));
+
+        // left gets decremented
+        fprintf(fp, "\t%s $1, %s\n",
+                command,
+                scratch_name(e->left->reg));
+        fprintf(fp, "\tmovq %s, %s\n",
+                scratch_name(e->left->reg),
+                symbol_codegen(e->left->symbol));       
+        scratch_free(e->left->reg);
+
+    } else if (e->left->kind == EXPR_ARR_INDEX) {
+        // left gets decremented
+        
+        expr_codegen(e->left);
+        e->reg = scratch_alloc();
+
+        fprintf(fp, "\tmovq %s, %s\n",
+                scratch_name(e->left->reg),
+                scratch_name(e->reg));
+
+        int i = scratch_alloc();
+        expr_codegen(e->left->right);
+        fprintf(fp, "\tleaq %s, %s\n",
+                e->left->left->symbol->name,
+                scratch_name(i));
+        fprintf(fp, "\tmovq $8, %%rax\n");
+        fprintf(fp, "\timulq %s\n",
+                scratch_name(e->left->right->reg));
+
+        fprintf(fp, "\taddq %s, %%rax\n",
+                scratch_name(i));
+        fprintf(fp, "\t%s $1, %s\n",
+                command,
+                scratch_name(e->left->reg));
+
+        fprintf(fp, "\tmovq %s, (%%rax)\n",
+                scratch_name(e->left->reg));
+
+        scratch_free(e->left->right->reg);
+        scratch_free(e->left->reg);
+
+    }
+}
+
+void expr_codegen_comp_str(struct expr *e, char *name) {
+    // move function caller registers
+    fprintf(fp, "\tpushq %%r10\n");
+    fprintf(fp, "\tpushq %%r11\n");
+
+    // move e->left and e->right into rdi, rsi
+    expr_codegen(e->left);
+    fprintf(fp, "\tmovq %s, %%rdi\n",
+                    scratch_name(e->left->reg));
+    scratch_free(e->left->reg);
+    expr_codegen(e->right);
+    fprintf(fp, "\tmovq %s, %%rsi\n",
+                    scratch_name(e->right->reg));
+    scratch_free(e->right->reg);
+
+    // call function
+    fprintf(fp, "\tcall strcmp\n");
+
+    // restore r10, r11
+    fprintf(fp, "\tpopq %%r11\n");
+    fprintf(fp, "\tpopq %%r10\n");
+
+    e->reg = scratch_alloc();
+
+    int str_eq_label = label_create();
+    int done_label = label_create();
+
+    // cmp rax
+    fprintf(fp, "\tcmp $0, %%rax\n");
+    // jump if rax == 0 meaning strings are equal
+    fprintf(fp, "\t%s %s\n", name, label_name(str_eq_label));
+    fprintf(fp, "\tmovq $0, %s\n", scratch_name(e->reg));
+    fprintf(fp, "\tjmp %s\n",label_name(done_label));
+
+    fprintf(fp, "%s:\n",label_name(str_eq_label));
+    fprintf(fp, "\tmovq $1, %s\n", scratch_name(e->reg));
+
+    fprintf(fp, "%s:\n",label_name(done_label));
+
 }

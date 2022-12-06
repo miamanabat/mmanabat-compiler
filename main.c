@@ -13,6 +13,8 @@ extern struct decl* d;
 typedef enum yytokentype token_t;
 int typecheck_error;
 int resolve_error;
+int codegen_error;
+FILE *fp;
 #define TOKEN_EOF 0
    
 /**
@@ -198,10 +200,24 @@ int typecheck() {
     return typecheck_error;
 }
 
+int codegen(char *assembly) {
+    int t = typecheck();
+    if (t) {
+        printf("typecheck failed.\n");
+        return 1;
+    }
+    codegen_error = 0;
+    fp = fopen(assembly, "w");
+    decl_codegen(d);
+    return codegen_error;
+
+}
+
 int main(int argc, char*argv[]) {
     int argind = 1;
     char *opt;
     char *file;
+    char *assembly;
 
     while (argind < argc && strlen(argv[argind]) > 1 && argv[argind][0] == '-')
     {
@@ -253,6 +269,17 @@ int main(int argc, char*argv[]) {
                 return 1;
             }
             return typecheck();
+        } else if (strcmp(argv[argind], "-codegen") == 0) {
+            argind++;
+            file = argv[argind];
+            argind++;
+            assembly = argv[argind];
+            yyin = fopen(file, "r");
+            if (!yyin) {
+                usage(argv[0]);
+                return 1;
+            }
+            return codegen(assembly);
         } else {
             usage(argv[0]);
             return 1;

@@ -25,7 +25,7 @@ void param_list_print( struct param_list *a ) {
     }
 }
 
-void param_list_resolve(struct scope *s, struct param_list *p) {
+void param_list_resolve(struct scope *s, struct param_list *p, struct decl *d) {
     if (!p) return;
     symbol_t kind = SYMBOL_PARAM;
     p->symbol = symbol_create(kind, p->type, p->name);
@@ -33,7 +33,9 @@ void param_list_resolve(struct scope *s, struct param_list *p) {
         printf("%s is already defined\n", p->name);
         resolve_error = 1;
     }
-    param_list_resolve(s, p->next);
+    p->symbol->which = inc_var_counter(s);
+    d->param_count += 1;
+    param_list_resolve(s, p->next, d);
     
 }
 
@@ -44,8 +46,10 @@ struct param_list *param_list_copy( struct param_list *param_list ) {
 
 struct param_list *param_list_from_exprlist( struct expr *e) {
     if (!e) return NULL;
-    if (!e->right) return param_list_create(0, expr_typecheck(e), 0);
-    if (e->right->kind != EXPR_LIST) {
+    if (e->kind != EXPR_LIST) {
+        return param_list_create(0, expr_typecheck(e), 0);
+    }
+    if (e->right && e->right->kind != EXPR_LIST) {
         return param_list_create(0,expr_typecheck(e->left), param_list_create(0, expr_typecheck(e->right), 0));
     }
     return param_list_create(0,expr_typecheck(e->left), param_list_from_exprlist(e->right));
@@ -54,7 +58,7 @@ struct param_list *param_list_from_exprlist( struct expr *e) {
 int param_list_compare( struct param_list *a, struct param_list *b, int resolve) {
     if (!a && !b) return 0; // 0 = same
     if (!a || !b) return 1;
-    if (type_compare(a->type, b->type, 0)) {
+    if (type_compare(&(a->type), &(b->type), 0)) {
         if (resolve) return 1;
         printf("type error: param_list type ");
         type_print(b->type);

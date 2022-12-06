@@ -57,22 +57,30 @@ struct type * type_copy( struct type *t ) {
     copy->num_elements = t->num_elements;
     return copy;
 }
-int type_compare( struct type *a, struct type *b, int change ) {
-    if (!a && !b) return 0;
-    if (!a || !b) return 1;
-    if (change && a->subtype && b->subtype && a->subtype->kind == TYPE_AUTO) {
-        a->subtype = type_copy(b->subtype);
-        printf("notice: type of array auto is now ");
-        type_print(b->subtype);
-        printf("\n");        
+int type_compare( struct type **a1, struct type **b1, int change ) {
+
+    if (!(*a1) && !(*b1)) return 0;
+    if (!(*a1) || !(*b1)) return 1;
+    
+    if (change && (*a1)->kind == TYPE_AUTO) {
+        *a1 = type_copy((*b1));
+        printf("notice: type of auto is now ");
+        type_print((*b1));
+        printf("\n");   
     }
-    if (a->kind == TYPE_ARRAY && b->kind == TYPE_ARRAY) {
-        printf("%d %d %d %d\n\n", a->arr_expr->literal_value, b->arr_expr->literal_value, a->num_elements, b->num_elements);
-        if (a->arr_expr->literal_value != b->num_elements) return 1;
-        return type_compare(a->subtype, b->subtype, change);
-    } else if (a->kind == TYPE_FUNCTION && b->kind == TYPE_FUNCTION) {
-        return type_compare(a->subtype, b->subtype, change) && param_list_compare(a->params, b->params, 0);
-    } else if (a->kind == b->kind){
+    if (change && (*a1)->subtype && (*b1)->subtype && (*a1)->subtype->kind == TYPE_AUTO) {
+        (*a1)->subtype = type_copy((*b1)->subtype);
+        printf("notice: type of auto is now ");
+        type_print((*b1)->subtype);
+        printf("\n");   
+    }
+
+    if ((*a1)->kind == TYPE_ARRAY && (*b1)->kind == TYPE_ARRAY) {
+        if ((*a1)->arr_expr->literal_value != (*b1)->num_elements) return 1;
+        return type_compare(&((*a1)->subtype), &((*b1)->subtype), change);
+    } else if ((*a1)->kind == TYPE_FUNCTION && (*b1)->kind == TYPE_FUNCTION) {
+        return type_compare(&((*a1)->subtype), &((*b1)->subtype), change) && param_list_compare((*a1)->params, (*b1)->params, 0);
+    } else if ((*a1)->kind == (*b1)->kind){
         return 0;
     } else {
         return 1;
