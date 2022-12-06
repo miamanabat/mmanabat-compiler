@@ -720,7 +720,7 @@ void expr_codegen( struct expr *e ) {
             fprintf(fp, "\tmovq %s, %rax\n",
                     scratch_name(e->left->reg));
             fprintf(fp, "\tcqo\n");
-            fprintf(fp, "idivq %s\n",
+            fprintf(fp, "\tidivq %s\n",
                     scratch_name(e->right->reg));
             fprintf(fp, "\tmovq %%rax, %s\n",
                     scratch_name(e->right->reg));
@@ -849,7 +849,6 @@ void expr_codegen( struct expr *e ) {
             {
                 e->reg = scratch_alloc();
                 fprintf(fp, "\t.data\n");
-
                 int l = label_create();
                 fprintf(fp, "%s:\n", label_name(l));
                 fprintf(fp, "\t.string %s\n",
