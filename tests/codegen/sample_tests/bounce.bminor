@@ -50,11 +50,14 @@ main: function integer () =
 	y: integer = precision * ysize / 2;
 
 	vx: integer = precision * 3;
-	vy: integer = precision * -5 ;
+	vy: integer = precision * -5;
 
 	deltat: integer = 100;
 
+    //what: integer = 3;
 	gfx_open(xsize,ysize,"Bounce!");
+
+
 	for(;;) {
 		print "x: ", x, " y: ", y, " vx: ", vx, " vy: ", vy, "\n";
 
@@ -90,5 +93,4 @@ main: function integer () =
 
 		usleep(deltat*precision);
 	}
-return 0;
 }

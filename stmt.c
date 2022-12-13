@@ -227,7 +227,6 @@ void stmt_typecheck(struct stmt *s, struct decl *decl) {
 void stmt_codegen( struct stmt *s ) {
     if(!s) return;
 
-    //printf("stmt %d\n", s->kind);
     switch(s->kind) {
         case STMT_DECL:
             decl_codegen(s->decl);

@@ -7,8 +7,9 @@ strcmp:function integer (s1:string, s2:string);
 main:function integer () = {
 
     // try reading with fgets
-    buff:string = "buffer";
-    fd:integer = fopen("test1.txt","r");
+    buff:string = "bufferrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr";
+    fd:integer = fopen("expr.c","r");
+    if (fd == 0) return 0;
     status: integer = fgets(buff, 4096, fd);
     for(;status != 0;) {
         if(strcmp(buff, "fd:integer;\n") == 0)

@@ -309,23 +309,21 @@ void func_prologue(struct decl *d) {
     fprintf(fp, "\tpushq %%rbp\n");
     fprintf(fp, "\tmovq %%rsp, %%rbp\n\n");
 
-        // save the arguments
-        for (int i = 0; i < d->param_count; i++) {
-            fprintf(fp, "\tpushq %s\n", arg_name(i));
-        }
-
-        // allocate space for local variables
-        fprintf(fp, "\tsubq $%d, %%rsp\n", d->local_count * 8 );
-
-    if (strcmp(d->name, "main") != 0) {
-
-        // save callee saved registers
-        fprintf(fp, "\tpushq %%rbx\n");
-        fprintf(fp, "\tpushq %%r12\n");
-        fprintf(fp, "\tpushq %%r13\n");
-        fprintf(fp, "\tpushq %%r14\n");
-        fprintf(fp, "\tpushq %%r15\n");
+    // save the arguments
+    for (int i = 0; i < d->param_count; i++) {
+        fprintf(fp, "\tpushq %s\n", arg_name(i));
     }
+
+    // allocate space for local variables
+    fprintf(fp, "\tsubq $%d, %%rsp\n", d->local_count * 8 );
+
+
+    // save callee saved registers
+    fprintf(fp, "\tpushq %%rbx\n");
+    fprintf(fp, "\tpushq %%r12\n");
+    fprintf(fp, "\tpushq %%r13\n");
+    fprintf(fp, "\tpushq %%r14\n");
+    fprintf(fp, "\tpushq %%r15\n");
 }
 
 void func_epilogue( struct decl *d ) {
@@ -337,7 +335,7 @@ void func_epilogue( struct decl *d ) {
     fprintf(fp, "\tpopq %%r13\n");
     fprintf(fp, "\tpopq %%r12\n");
     fprintf(fp, "\tpopq %%rbx\n");
-
+    
     // reset stack to base pointer
     fprintf(fp, "\tmovq %%rbp, %%rsp\n");
 
