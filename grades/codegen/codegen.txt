@@ -1,0 +1,1808 @@
+=====STUDENT TESTS=====
+====Good Tests====
+===[good10.bminor Input]===
+// tests ternary 
+x:integer=10;
+main:function integer () =
+{
+    y: integer = -3 + 2 * 6; // should be 9
+    a: auto = y > x ? x : y;
+    print a, " should be 9\n";
+    return 0;	
+	
+}
+
+===[good10.bminor Compiler Output]===
+Successfully generated code
+Successfully compiled assembly
+Expected output:
+true should be 9
+
+Expected return code:
+0
+Actual output:
+true should be 9
+
+Actual return code:
+0
+Test Passed!
+===[good11.bminor Input]===
+// if else statements
+/* if else with no blocks, else ifs etc.*/ 
+main:function integer () =
+{
+    if (true && false) {
+        print "should not be printed\n";
+    } else if (true || false) {
+        print "should be printed\n";
+    } else {
+        print "should not be printed\n";
+    }
+
+    if (!true) 
+        print "should not be printed\n";
+    else if (!false)
+        print "should be printed\n";
+    else
+        print "should not be printed\n";
+
+    if (true)
+        if (true) print "should be printed\n";
+        else print "should not be printed\n";
+    return 0;
+}
+
+===[good11.bminor Compiler Output]===
+Successfully generated code
+Successfully compiled assembly
+Expected output:
+should be printed
+should not be printed
+should be printed
+
+Expected return code:
+0
+Actual output:
+should be printed
+should not be printed
+should be printed
+
+Actual return code:
+0
+Test Passed!
+===[good12.bminor Input]===
+// array initialization - all 0s if undefined
+arr: array[6]integer;
+arr2: array[6] integer = {1,2,3,4,5,6};
+main: function void () =
+{
+    print "should be 000000, 123456:\n";
+    i: integer = 0;
+    for (i = 0; i < 6; i++) {
+        print arr[i];
+    }
+    for (i = 0; i < 6; i++) {
+        print arr2[i];
+    }
+
+}
+
+===[good12.bminor Compiler Output]===
+Successfully generated code
+Successfully compiled assembly
+Expected output:
+should be 000000, 123456:
+000000123456
+Expected return code:
+1
+Actual output:
+should be 000000, 123456:
+000000123456
+Actual return code:
+1
+Test Passed!
+===[good13.bminor Input]===
+// tests strings and string comparisions
+// and use of strings as local variables
+
+str:string = "hello";
+str2:string = "hello";
+str3: string = "world";
+str4: string;
+
+main:function integer () = {
+    str4 = "hello";
+
+    str5: string = "hello";
+
+    bad_str: string = "world";
+
+        // comparing literal and global
+         if (str == "hello") {
+            print "should be printed\n";
+         }  else {
+            print "should not be printed\n";
+         }
+        if (str != "hello") {
+            print "should not be printed\n";
+         }  else {
+            print "should be printed\n";
+         }
+        if (str == "world") {
+            print "should not be printed\n";
+         }  else {
+            print "should be printed\n";
+         }
+        if (str != "world") {
+            print "should be printed\n";
+         }  else {
+            print "should not be printed\n";
+         }
+
+
+        // two globals
+        if (str == str2) {
+            print "should be printed\n";
+         }  else {
+            print "should not be printed";
+         }
+        if (str != str2) {
+            print "should not be printed\n";
+         }  else {
+            print "should be printed\n";
+         }
+        if (str != str3) {
+            print "should be printed\n";
+         }  else {
+            print "should not be printed";
+         }
+        if (str == str3) {
+            print "should not be printed\n";
+         }  else {
+            print "should be printed\n";
+         }
+
+
+        // comparing global and local
+        if (str == str5) {
+            print "should be printed\n";
+         }  else {
+            print "should not be printed\n";
+         }
+        if (str != str5) {
+            print "should not be printed\n";
+         }  else {
+            print "should be printed\n";
+         }
+        if (str == bad_str) {
+            print "should not be printed\n";
+         }  else {
+            print "should be printed\n";
+         }
+        if (str != bad_str) {
+            print "should be printed\n";
+         }  else {
+            print "should not be printed\n";
+         }
+
+
+
+
+
+
+}
+
+===[good13.bminor Compiler Output]===
+Successfully generated code
+Successfully compiled assembly
+Expected output:
+
+Expected return code:
+0
+Actual output:
+
+Actual return code:
+0
+Test Passed!
+===[good14.bminor Input]===
+// tests exponents 
+x:integer = 2;
+main: function integer () =
+{
+    print " should be 64 and 0: \n";
+    print (x^6), " ", (x^-4), "\n";	
+    return x;
+}
+
+===[good14.bminor Compiler Output]===
+Successfully generated code
+Successfully compiled assembly
+Expected output:
+ should be 64 and 0: 
+64 1
+
+Expected return code:
+2
+Actual output:
+ should be 64 and 0: 
+64 1
+
+Actual return code:
+2
+Test Passed!
+===[good15.bminor Input]===
+// tests auto 
+x: auto = 1;
+a: auto = {1,2,3,4};
+b: auto = true;
+c: auto = 'c';
+
+main: function integer () = {
+	print x, a[1], b, c;
+}
+
+===[good15.bminor Compiler Output]===
+Successfully generated code
+Successfully compiled assembly
+Expected output:
+12truec
+Expected return code:
+99
+Actual output:
+12truec
+Actual return code:
+99
+Test Passed!
+===[good16.bminor Input]===
+// pemdas checks
+main:function integer () =
+{
+    a: integer = 1;
+    x: integer = 4 *3 / 1 + 5 - (3^(a+++1)^2);
+    print "a should be 2, x should be -64:\n";
+    print a, " ", x, "\n";	
+}
+
+===[good16.bminor Compiler Output]===
+Successfully generated code
+Successfully compiled assembly
+Expected output:
+a should be 2, x should be -64:
+2 -64
+
+Expected return code:
+1
+Actual output:
+a should be 2, x should be -64:
+2 -64
+
+Actual return code:
+1
+Test Passed!
+===[good17.bminor Input]===
+// nested blocks and stuff
+
+main:function integer () =
+{
+    b: integer = 9;
+    print b;
+    if (true){
+        z: integer = 4;
+        print z, "\n";
+    }
+    if (true) {
+        c: integer = 3;
+        print b, " ", c, "\n";
+    }
+
+    {
+        var: integer = 1;
+        print var;
+             {
+                var2: integer = 2;
+                print var, var2;
+             }
+        print var;
+    }
+    return 0;
+}
+
+===[good17.bminor Compiler Output]===
+Successfully generated code
+Successfully compiled assembly
+Expected output:
+94
+9 3
+1121
+Expected return code:
+0
+Actual output:
+94
+9 3
+1121
+Actual return code:
+0
+Test Passed!
+===[good18.bminor Input]===
+/*
+nested for loops
+*/
+
+main: function void () =
+{
+	i: integer;
+	j: integer;
+	
+	for(j=0;j<10;j++) {
+		for(i=0;i<10;i++) {
+            print i, j;
+		}
+		print "\n";
+	}
+}
+
+
+===[good18.bminor Compiler Output]===
+Successfully generated code
+Successfully compiled assembly
+Expected output:
+00102030405060708090
+01112131415161718191
+02122232425262728292
+03132333435363738393
+04142434445464748494
+05152535455565758595
+06162636465666768696
+07172737475767778797
+08182838485868788898
+09192939495969798999
+
+Expected return code:
+1
+Actual output:
+00102030405060708090
+01112131415161718191
+02122232425262728292
+03132333435363738393
+04142434445464748494
+05152535455565758595
+06162636465666768696
+07172737475767778797
+08182838485868788898
+09192939495969798999
+
+Actual return code:
+1
+Test Passed!
+===[good19.bminor Input]===
+// some fun standard library fun stuff
+fd:integer;
+fgets:function integer (s:string, size:integer, file:integer);
+fopen:function integer (path:string, mode:string);
+strcmp:function integer (s1:string, s2:string);
+
+main:function integer () = {
+
+    // try reading with fgets
+    buff:string = "buffer";
+    fd:integer = fopen("test1.txt","r");
+    status: integer = fgets(buff, 4096, fd);
+    for(;status != 0;) {
+        if(strcmp(buff, "fd:integer;\n") == 0)
+            print "yes!\n";
+        print buff;
+        status = fgets(buff, 4096, fd);
+    }
+
+    return 0;
+}
+
+===[good19.bminor Compiler Output]===
+Successfully generated code
+Successfully compiled assembly
+Expected output:
+
+Expected return code:
+-11
+Actual output:
+
+Actual return code:
+-11
+Test Passed!
+===[good1.bminor Input]===
+// tests arithmetic stuff 
+
+str:string = "hello";
+str2:string = " world";
+
+arr: array [4] integer = {1,2,3,4};
+
+func: function boolean(x: integer) = {
+    print x;
+    return x == 2;
+      }
+main:function integer () =
+{
+    if (3 >= 1) {
+        print "3 is greater than 1\n";
+    }
+ 
+    print arr[0]," ", arr[1], " ", arr[2], " ", arr[3], "\n";
+    print "yes\n";
+    arr[0] = 234;
+    arr[1] = 45;
+    arr[2] = 11;
+    arr[3] = 12;
+    
+    print arr[0]," ", arr[1], " ", arr[2], " ", arr[3], "\n";
+
+    //print func(arr[0]), func(arr[1]), func(2);
+
+    print 1 + 2, "\n";
+
+    x: integer = 0;
+    x = x + 1; 
+    print x; 
+    print " should be 1\n";
+
+    x = x - 1; 
+    print x; print " should be 0\n";
+    x = 6;
+    x = x * x; print x; print " should be 36\n";
+    x = x / x; print x; print " should be 1\n";
+    x = 2;
+    print x % 2; print " should be 0\n";
+    print x^2; print " should be 4\n";
+    print x^2^3; print " should be 256\n";
+
+    
+
+    return 0;	
+}
+
+===[good1.bminor Compiler Output]===
+Successfully generated code
+Successfully compiled assembly
+Expected output:
+3 is greater than 1
+1 2 3 4
+yes
+234 45 11 12
+3
+1 should be 1
+0 should be 0
+36 should be 36
+1 should be 1
+0 should be 0
+4 should be 4
+64 should be 256
+
+Expected return code:
+0
+Actual output:
+3 is greater than 1
+1 2 3 4
+yes
+234 45 11 12
+3
+1 should be 1
+0 should be 0
+36 should be 36
+1 should be 1
+0 should be 0
+4 should be 4
+64 should be 256
+
+Actual return code:
+0
+Test Passed!
+===[good20.bminor Input]===
+// sorting array
+arr: array [8] integer = { 45, 23, 1, 3, 6, 7, 985, 23 };
+
+main: function void () = {
+    i: integer = 0;
+
+    for (i = 0; i < 8; i++) 
+            print arr[i], ", ";
+    print "\nsorted array: ";
+    
+       for (i = 0; i < 7; i++) {
+            min_i: integer = i;
+            j: integer;
+            for (j = i+1; j < 8; j++) {
+                if (arr[j] < arr[min_i]){
+                    min_i = j;
+                }
+            }
+
+            if (min_i != i) {
+                temp: integer = arr[min_i];
+                arr[min_i] = arr[i];
+                arr[i] = temp;
+            }
+           
+       }
+        for (i = 0; i < 8; i++) 
+            print arr[i], ", ";
+        
+}
+
+===[good20.bminor Compiler Output]===
+Successfully generated code
+Successfully compiled assembly
+Expected output:
+45, 23, 1, 3, 6, 7, 985, 23, 
+sorted array: 1, 3, 6, 7, 23, 23, 45, 985, 
+Expected return code:
+2
+Actual output:
+45, 23, 1, 3, 6, 7, 985, 23, 
+sorted array: 1, 3, 6, 7, 23, 23, 45, 985, 
+Actual return code:
+2
+Test Passed!
+===[good2.bminor Input]===
+// tests arrays !!  
+
+str:string = "hello";
+str2:string = " world";
+
+arr: array [4] integer = {1,2,3,4};
+
+main:function integer () =
+{
+ 
+    print arr[0]," ", arr[1], " ", arr[2], " ", arr[3], "\n";
+    arr[0] = -23;
+    arr[1] = 45;
+    arr[2] = 11;
+    arr[3] = 12;
+    
+    print arr[0],": -23 ", arr[1], ": 45  ", arr[2], ": 11 ", arr[3], ": 12 \n";
+
+    arr[0] = arr[1] + arr[2];
+    print arr[0], " should be 56\n";
+    return 0;	
+}
+
+===[good2.bminor Compiler Output]===
+Successfully generated code
+Successfully compiled assembly
+Expected output:
+1 2 3 4
+-23: -23 45: 45  11: 11 12: 12 
+56 should be 56
+
+Expected return code:
+0
+Actual output:
+1 2 3 4
+-23: -23 45: 45  11: 11 12: 12 
+56 should be 56
+
+Actual return code:
+0
+Test Passed!
+===[good3.bminor Input]===
+// tests function calls for strings and integers 
+
+str:string = "hello";
+str2:string = " world";
+i: integer = 76;
+
+arr: array [4] integer = {1,2,3,4};
+
+func: function boolean(x: integer) = {
+    //print x;
+    return x == 2;
+      }
+
+f_int: function integer (x: integer) = {
+    return x;
+}
+
+f_str: function string (s: string) = {
+    //print s, "\n";
+    return s;
+}
+
+main:function integer () =
+{
+
+ 
+    print arr[0]," ", arr[1], " ", arr[2], " ", arr[3], "\n"; 
+
+    print "int args (false, true true) ", func(arr[0]), func(arr[1]), func(2), "\n";
+
+    print "(76, 76)", i, " ", 76, " \n";
+    i = 67;
+    print "(67, 76, 67, 67) ", i, i + 9, f_int(i), f_int(67), "\n";
+
+
+
+    s: string = "hello";
+    str2 = "hello";
+    str3: string = str2;
+
+
+    print "testing function calls with global, literal, local, and reassigned strings: \n";
+    print "string args (hello, hello, hello, hello, hello) ", f_str(str), f_str("hello"), f_str("hello"), f_str(str2), f_str(str3), "\n";
+    
+
+    return 0;	
+}
+
+===[good3.bminor Compiler Output]===
+Successfully generated code
+Successfully compiled assembly
+Expected output:
+
+Expected return code:
+0
+Actual output:
+
+Actual return code:
+0
+Test Passed!
+===[good4.bminor Input]===
+// tests function calls for booleans and chars 
+
+i: boolean = true;
+a: char = 'h';
+b: char;
+
+f_char: function char (x: char) = {
+    print x, "\n";
+    return x;
+}
+
+f_bool: function boolean (s: boolean) = {
+    print s, "\n";
+    return s;
+}
+
+main:function integer () =
+{
+    b = a;
+    c: char = 'b';
+    z: boolean = false;
+
+    print "testing function calls with global, literal, local, and reassigned strings: \n";
+    print f_char(a), f_char(b), f_char(c), f_bool(i);
+    print f_bool(true), f_bool(false), f_bool(z), "\n";
+    
+    charrr:char = '\t';
+    print charrr;
+    print '\n', '\t', '\?', '\\';
+
+    return 0;	
+}
+
+===[good4.bminor Compiler Output]===
+Successfully generated code
+Successfully compiled assembly
+Expected output:
+hhhhhhbhbtruetruetruetruefalsefalsefalsefalse
+	
+	?\
+Expected return code:
+0
+Actual output:
+hhhhhhbhbtruetruetruetruefalsefalsefalsefalse
+	
+	?\
+Actual return code:
+0
+Test Passed!
+===[good5.bminor Input]===
+// comparing chars, ints, bools
+x: integer = 5;
+y: integer = 4;
+z: integer = 5;
+
+a: char = 'a';
+b: char = 'b';
+c: char = 'a';
+
+t: boolean = true;
+f: boolean = false;
+
+main:function integer () = {
+	print "x > y should be true: ", x>y, "\n";
+	print "x >= y should be true: ", x>=y, "\n";
+	print "x < y should be false: ", x<y, "\n";
+	print "x <= y should be false: ", x<=y, "\n";
+	print "x == y should be false: ", x==y, "\n";
+	print "x != y should be true: ", x!=y, "\n";
+  
+	print "x > z should be false: ", x>z, "\n";
+	print "x >= z should be true: ", x>=z, "\n";
+	print "x < z should be false: ", x<z, "\n";
+	print "x <= z should be true: ", x<=z, "\n";
+	print "x == z should be true: ", x==z, "\n";
+	print "x != z should be false: ", x!=z, "\n";
+
+
+    print "true == false should be false: ", t==f, "\n";
+    print "true == true should be true: ", t==t, "\n";
+    print "false == false should be true: ", f==f, "\n";
+    
+    print "true != false should be true: ", t!=f, "\n";
+    print "true != true should be false: ", t!=t, "\n";
+    print "false != false should be false: ", f!=f, "\n";
+
+
+    print "a == b should be false: ", a==b, "\n";
+    print "a != b should be true: ", a!=b, "\n";
+    print "a == c should be true: ", a==c, "\n";
+    print "a != c should be false: ", a!=c, "\n";
+
+
+}
+
+===[good5.bminor Compiler Output]===
+Successfully generated code
+Successfully compiled assembly
+Expected output:
+x > y should be true: true
+x >= y should be true: true
+x < y should be false: false
+x <= y should be false: false
+x == y should be false: false
+x != y should be true: true
+x > z should be false: false
+x >= z should be true: true
+x < z should be false: false
+x <= z should be true: true
+x == z should be true: true
+x != z should be false: false
+true == false should be false: false
+true == true should be true: true
+false == false should be true: true
+true != false should be true: true
+true != true should be false: false
+false != false should be false: false
+a == b should be false: false
+a != b should be true: true
+a == c should be true: true
+a != c should be false: false
+
+Expected return code:
+1
+Actual output:
+x > y should be true: true
+x >= y should be true: true
+x < y should be false: false
+x <= y should be false: false
+x == y should be false: false
+x != y should be true: true
+x > z should be false: false
+x >= z should be true: true
+x < z should be false: false
+x <= z should be true: true
+x == z should be true: true
+x != z should be false: false
+true == false should be false: false
+true == true should be true: true
+false == false should be true: true
+true != false should be true: true
+true != true should be false: false
+false != false should be false: false
+a == b should be false: false
+a != b should be true: true
+a == c should be true: true
+a != c should be false: false
+
+Actual return code:
+1
+Test Passed!
+===[good6.bminor Input]===
+// increment, decrement, negating 
+arr: array [4] integer = {1, 2, 3, 4};
+main:function integer ()= {
+    x: integer = 0;
+    y:integer = 1;
+    
+    a: integer = x++;
+    print "a should be 0, x should be 1: ", a, x, "\n";
+
+    a = y--;
+    print "a should be 1, y should be 0: ", a, y, "\n";	
+
+    a = -x;
+    print "a should be -1, x should be 1: ", a, x, "\n";
+
+    print "this should be 3, 4, 4, 3\n";
+    print arr[2]++, arr[2], arr[3]--, arr[3], "\n";
+}
+
+
+===[good6.bminor Compiler Output]===
+Successfully generated code
+Successfully compiled assembly
+Expected output:
+a should be 0, x should be 1: 01
+a should be 1, y should be 0: 10
+a should be -1, x should be 1: -11
+this should be 3, 4, 4, 3
+3443
+
+Expected return code:
+1
+Actual output:
+a should be 0, x should be 1: 01
+a should be 1, y should be 0: 10
+a should be -1, x should be 1: -11
+this should be 3, 4, 4, 3
+3443
+
+Actual return code:
+1
+Test Passed!
+===[good7.bminor Input]===
+// function calls, no args, one arg, multiple args
+x:integer = 5;
+y: boolean = true;
+
+nothing: function boolean () = {
+    print "hey no args worked\n";
+    return true;
+}
+onearg: function boolean (i: integer) = {
+    print i, "yay one arg worked\n";
+    return true;
+}
+
+multargs: function boolean(i: integer, a: boolean) = {
+    print i, a, "yay two args worked\n";
+    return true;
+}
+
+main:function integer () = {
+	print nothing(), onearg(2), multargs(2, true);
+}
+
+===[good7.bminor Compiler Output]===
+Successfully generated code
+Successfully compiled assembly
+Expected output:
+hey no args worked
+true2yay one arg worked
+true2trueyay two args worked
+true
+Expected return code:
+4
+Actual output:
+hey no args worked
+true2yay one arg worked
+true2trueyay two args worked
+true
+Actual return code:
+4
+Test Passed!
+===[good8.bminor Input]===
+// for loops with less expressions 
+x:integer=5;
+
+main:function integer () = {
+	
+    i: integer = 0;
+
+       for (i = 0; i < 4; i++) {
+            print i;
+       }
+        print "\n";
+        i = 0;
+       for (; i < 4; i++) {
+            print i;
+       }
+        print "\n";
+
+       for (i=0; i < 4; ) {
+            print i;
+            i = i+1;
+       }
+        print "\n";
+
+       for (i = 0; ; i++) {
+           if (i >= 4 ) {
+                return 0;
+           }
+            print i;
+       }
+        print "\n";
+        
+}
+
+===[good8.bminor Compiler Output]===
+Successfully generated code
+Successfully compiled assembly
+Expected output:
+0123
+0123
+0123
+0123
+Expected return code:
+0
+Actual output:
+0123
+0123
+0123
+0123
+Actual return code:
+0
+Test Passed!
+===[good9.bminor Input]===
+// ands and ors and not 
+x:integer = 5;
+main:function integer () =
+{
+	print "true: ", true&&true, " false: ", true&&false, ", true: ", true||false, "\n";
+
+    print "false: ", !true, ", false: ", !true, ", true: ", !!true, "\n";
+}
+
+===[good9.bminor Compiler Output]===
+Successfully generated code
+Successfully compiled assembly
+Expected output:
+true: true false: false, true: true
+false: true, false: true, true: true
+
+Expected return code:
+1
+Actual output:
+true: true false: false, true: true
+false: true, false: true, true: true
+
+Actual return code:
+1
+Test Passed!
+=====HIDDEN TESTS=====
+====Good Tests====
+===[good1.bminor Input]===
+strlen: function integer(s: string);
+f: function integer(i: integer);
+
+main: function integer () = {
+	if (f(strlen("hi")) > strlen("there")) {print "no\n";}
+	if (f(f(strlen("hi"))) > strlen("there")) print "ok\n";
+
+	return 0;
+}
+
+f: function integer(i: integer) = {
+	return i*2;
+}
+
+===[good1.bminor Compiler Output]===
+Successfully generated code
+Successfully compiled assembly
+Expected output:
+ok
+
+Expected return code:
+0
+Actual output:
+ok
+
+Actual return code:
+0
+Test Passed!
+===[good11.bminor Input]===
+main: function integer () = {
+	x: integer = 20;
+	y: integer = x;
+	{
+		x: integer = 10;
+		y = y + x;
+	}
+
+	{
+		{
+			y = y + x;
+			x: integer = 2;
+			y = y + x;
+		}
+		y = y + x;
+		x: integer = 3;
+		y = y + x;
+	}
+	return y + x;
+}
+
+===[good11.bminor Compiler Output]===
+Successfully generated code
+Successfully compiled assembly
+Expected output:
+
+Expected return code:
+95
+Actual output:
+
+Actual return code:
+95
+Test Passed!
+===[good12.bminor Input]===
+main: function integer () = {
+	return 4 + 9 / (-2 - (-5)) + (((2 + 1) * 4) - 1) % 3 * 7 - 2^3;
+}
+
+===[good12.bminor Compiler Output]===
+Successfully generated code
+Successfully compiled assembly
+Expected output:
+
+Expected return code:
+13
+Actual output:
+
+Actual return code:
+13
+Test Passed!
+===[good13.bminor Input]===
+foo_epilogue: function integer () = {
+	return 2;
+}
+
+foo: function integer ();
+
+main: function integer () = {
+	return foo() * 11;
+}
+
+main_epilogue: function integer () = {
+	return foo_epilogue() + 3;
+}
+
+foo: function integer () = {
+	return main_epilogue() - 1;
+}
+
+===[good13.bminor Compiler Output]===
+Successfully generated code
+Successfully compiled assembly
+Expected output:
+
+Expected return code:
+44
+Actual output:
+
+Actual return code:
+44
+Test Passed!
+===[good14.bminor Input]===
+// https://piazza.com/class/jziupd2lzpm7cy?cid=185
+
+s: string = "no\n";
+
+f: function string() = {
+	t: string = s;
+	s = "ok\n";
+	return t;
+}
+
+main: function integer () = {
+	print f();
+	print s;
+
+	return 0;
+}
+
+===[good14.bminor Compiler Output]===
+Successfully generated code
+Successfully compiled assembly
+Expected output:
+0`0`
+Expected return code:
+0
+Actual output:
+0`0`
+Actual return code:
+0
+Test Passed!
+===[good15.bminor Input]===
+// https://piazza.com/class/jziupd2lzpm7cy?cid=179
+
+strdup: function string (s: string);
+
+main: function integer () = {
+	a: string = "sssss";
+	b: string = strdup(a);
+	if (a==b) return 22; else return 11;
+}
+
+===[good15.bminor Compiler Output]===
+Successfully generated code
+Successfully compiled assembly
+Expected output:
+
+Expected return code:
+11
+Actual output:
+
+Actual return code:
+11
+Test Passed!
+===[good16.bminor Input]===
+// https://piazza.com/class/jziupd2lzpm7cy?cid=176
+
+f: function void ( x: string ) = 
+{
+	print x;
+}
+
+main: function integer() =
+{
+	s: string = "hello";
+	f(s);
+	return 0;
+}
+
+===[good16.bminor Compiler Output]===
+Successfully generated code
+Successfully compiled assembly
+Expected output:
+hello
+Expected return code:
+0
+Actual output:
+hello
+Actual return code:
+0
+Test Passed!
+===[good17.bminor Input]===
+a1: integer;
+a2: integer = 111;
+a3: boolean = false;
+
+A: function integer() = {
+	if (a3) return a1 * a2;
+	a2: integer = 3;
+	if (!!!a3) return a1 + a2;
+	return 0;
+}
+
+main: function integer() = { return A(); }
+
+===[good17.bminor Compiler Output]===
+Successfully generated code
+Successfully compiled assembly
+Expected output:
+
+Expected return code:
+114
+Actual output:
+
+Actual return code:
+114
+Test Passed!
+===[good18.bminor Input]===
+b1: integer = 3;
+b2: integer = 6;
+b3: integer = 9;
+
+B: function integer(b3: integer, b4: integer) = {
+	print b1 * b2 + b3 % b4;
+	print '\n';
+	b3 = 37;
+	return b3;
+}
+
+main: function integer () = {
+	print B(5, 3);
+	return b3;
+}
+
+===[good18.bminor Compiler Output]===
+Successfully generated code
+Successfully compiled assembly
+Expected output:
+20
+37
+Expected return code:
+9
+Actual output:
+20
+37
+Actual return code:
+9
+Test Passed!
+===[good2.bminor Input]===
+X: array [4] integer = {11, 30, 22, 0};
+
+main: function integer () = {
+	i: integer;
+	for (i = 0; X[i] != 0; i++)
+		print X[i], ' ', X[i] % 3, '\n';
+
+	return 0;
+}
+
+===[good2.bminor Compiler Output]===
+Successfully generated code
+Successfully compiled assembly
+Expected output:
+11 2
+30 0
+22 1
+
+Expected return code:
+0
+Actual output:
+11 2
+30 0
+22 1
+
+Actual return code:
+0
+Test Passed!
+===[good20.bminor Input]===
+D: function integer() = {
+	d1: integer = 5;
+	d2: integer = d1 + 1; //6
+	{
+		d3: integer = 9;
+		d2: integer = d3 + d1 - 3; //11
+		d4: integer = -1;
+		d2 = d2 + d3; //20
+		print d2 - d4, "\n";
+	}
+	d4: integer = 16;
+	print d2 - d4, '\n';
+	{
+		d4: integer = -2;
+		d3: integer = 1000;
+		print d3 + 10;
+		print "\n";
+		print d4;
+		print '\n';
+	}
+	print d4;
+	return 3;
+}
+
+main: function integer () = {
+	return D();
+}
+
+===[good20.bminor Compiler Output]===
+Successfully generated code
+Successfully compiled assembly
+Expected output:
+21
+-10
+1010
+-2
+16
+Expected return code:
+3
+Actual output:
+21
+-10
+1010
+-2
+16
+Actual return code:
+3
+Test Passed!
+===[good4.bminor Input]===
+collatz: function integer(n: integer, acc: integer) = {
+	print n, '\n';
+	if (n == 1) return acc;
+
+	if (n % 2 == 0) return collatz(n/2, acc + 1);
+	else return collatz(3*n + 1, acc + 1);
+}
+
+main:function integer ()=
+{
+	return collatz(27, 0);
+}
+
+===[good4.bminor Compiler Output]===
+Successfully generated code
+Successfully compiled assembly
+Expected output:
+27
+82
+41
+124
+62
+31
+94
+47
+142
+71
+214
+107
+322
+161
+484
+242
+121
+364
+182
+91
+274
+137
+412
+206
+103
+310
+155
+466
+233
+700
+350
+175
+526
+263
+790
+395
+1186
+593
+1780
+890
+445
+1336
+668
+334
+167
+502
+251
+754
+377
+1132
+566
+283
+850
+425
+1276
+638
+319
+958
+479
+1438
+719
+2158
+1079
+3238
+1619
+4858
+2429
+7288
+3644
+1822
+911
+2734
+1367
+4102
+2051
+6154
+3077
+9232
+4616
+2308
+1154
+577
+1732
+866
+433
+1300
+650
+325
+976
+488
+244
+122
+61
+184
+92
+46
+23
+70
+35
+106
+53
+160
+80
+40
+20
+10
+5
+16
+8
+4
+2
+1
+
+Expected return code:
+111
+Actual output:
+27
+82
+41
+124
+62
+31
+94
+47
+142
+71
+214
+107
+322
+161
+484
+242
+121
+364
+182
+91
+274
+137
+412
+206
+103
+310
+155
+466
+233
+700
+350
+175
+526
+263
+790
+395
+1186
+593
+1780
+890
+445
+1336
+668
+334
+167
+502
+251
+754
+377
+1132
+566
+283
+850
+425
+1276
+638
+319
+958
+479
+1438
+719
+2158
+1079
+3238
+1619
+4858
+2429
+7288
+3644
+1822
+911
+2734
+1367
+4102
+2051
+6154
+3077
+9232
+4616
+2308
+1154
+577
+1732
+866
+433
+1300
+650
+325
+976
+488
+244
+122
+61
+184
+92
+46
+23
+70
+35
+106
+53
+160
+80
+40
+20
+10
+5
+16
+8
+4
+2
+1
+
+Actual return code:
+111
+Test Passed!
+===[good5.bminor Input]===
+A: function boolean(x: integer, y: integer);
+B: function integer(x: char);
+C: function char(a: string);
+
+main: function integer() = {
+	if (A(B('d') - 1, 10)) {
+		x: integer = 3;
+		return 2 * B('!') + x;
+	}
+	return B(C("hello")) % 3;
+}
+
+A: function boolean(x: integer, y: integer) = {
+	return x == y;
+}
+
+B: function integer(c: char) = {
+	if (c == '!')
+		return 10;
+	else {return 11;}
+}
+
+C: function char(a: string) = {
+	return '!';
+}
+
+===[good5.bminor Compiler Output]===
+Successfully generated code
+Successfully compiled assembly
+Expected output:
+
+Expected return code:
+23
+Actual output:
+
+Actual return code:
+23
+Test Passed!
+===[good7.bminor Input]===
+f: function void (i: integer) = {
+	N: integer;
+	for (N = 0; i > 0; i--) {
+		print N;
+		N = N + 1;
+	}
+}
+
+main:function integer () = {
+	N: integer = 6;
+	for (;;N--) {
+		f(N);
+		print '\n';
+		if (N == 0) return 0;
+	}
+
+	return 1;
+}
+
+===[good7.bminor Compiler Output]===
+Successfully generated code
+Successfully compiled assembly
+Expected output:
+012345
+01234
+0123
+012
+01
+0
+
+
+Expected return code:
+0
+Actual output:
+012345
+01234
+0123
+012
+01
+0
+
+
+Actual return code:
+0
+Test Passed!
+===[good8.bminor Input]===
+abs: function integer(n: integer);
+
+digits: array [6] integer = {
+	14,
+	8,
+	6168,
+	42,
+	0,
+	74546
+};
+
+main:function integer () = {
+	digits[4] = -468;
+	i: integer = 0;
+	for (; abs(digits[i]) == digits[i];) {
+		print digits[i];
+		i = i + 1;
+		print ' ';
+	}
+	print '\n';
+
+	return 0;
+}
+
+===[good8.bminor Compiler Output]===
+Successfully generated code
+Successfully compiled assembly
+Expected output:
+14 8 6168 42 
+
+Expected return code:
+0
+Actual output:
+14 8 6168 42 
+
+Actual return code:
+0
+Test Passed!
+===[good9.bminor Input]===
+a: array[4] integer;
+main: function integer() = {
+	a[2] = 60;
+	return a[2] + a[2] / 20 * 3 - a[1];
+}
+
+===[good9.bminor Compiler Output]===
+Successfully generated code
+Successfully compiled assembly
+Expected output:
+
+Expected return code:
+69
+Actual output:
+
+Actual return code:
+69
+Test Passed!
+===[good10.bminor Input]===
+w: string = "no";
+
+f: function void (s: string) = {
+	{
+		w: string = "ok";
+		print w, "\n";
+		w = "bad!\n";
+	}
+	print s, ' ', w;
+	print " ";
+	s = "changed\n";
+	print s;
+}
+
+main:function integer ()= {
+	s: string = "good";
+	f(s);
+	print s;
+
+	return 0;
+}
+
+===[good10.bminor Compiler Output]===
+Assembly code could not be generated:
+std_out:
+
+std_err:
+
+Return code:
+-11
+TEST NOT PASSED
+===[good3.bminor Input]===
+T: array [8] integer = {2, 1, 1, 2, 1, 2, 0, 3};
+
+main:function integer ()=
+{
+	i: integer = 0;
+        for (;;) {
+		if (T[i] == 0) return T[5] + 10;
+		else if (T[i] == 1) i++;
+		else if (T[i] == 2) T[i++]--;
+		else return 1;
+	}
+
+	return 0;
+}
+
+===[good3.bminor Compiler Output]===
+Successfully generated code
+Successfully compiled assembly
+Expected output:
+
+Expected return code:
+11
+Actual output:
+
+Actual return code:
+11
+Test Passed!
+===[good6.bminor Input]===
+f: function boolean(b: boolean) = {
+	return !b;
+}
+
+x: integer = 4;
+
+main:function integer ()=
+{
+	y: integer = 10;
+	if (f(f(f(f(f(x <= y)))))) return 1;
+	else if (x < y - x*y) {
+		return 4;
+	} else return 2;
+}
+
+===[good6.bminor Compiler Output]===
+Successfully generated code
+Successfully compiled assembly
+Expected output:
+
+Expected return code:
+1
+Actual output:
+
+Actual return code:
+1
+Test Passed!
+===[good19.bminor Input]===
+c1: integer = 1;
+c3: integer = 100;
+
+C: function integer(c1: integer, c2: integer) = {
+	c3: integer = 11;
+	c4: integer = 12;
+	c5: integer = 13;
+	return c1 + c2 + c3 + c4;
+}
+
+main: function integer() = {
+	return C(1, 2);
+}
+
+===[good19.bminor Compiler Output]===
+Successfully generated code
+Successfully compiled assembly
+Expected output:
+
+Expected return code:
+26
+Actual output:
+
+Actual return code:
+26
+Test Passed!
+===== SUMMARIZED RESULTS =====
+{
+  "hidden_tests": {
+    "correct": 19,
+    "incorrect": 1
+  },
+  "student_tests": {
+    "correct": 20,
+    "incorrect": 0
+  }
+}
